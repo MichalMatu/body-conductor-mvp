@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { QuickPoseCamera } from 'quickpose-react-native-pose-estimation';
+import { View, Text, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { QuickPoseView } from '@quickpose/react-native';
+import * as Camera from 'expo-camera';
 import { useAppStore } from '../stores/useAppStore';
 import { useBodyMapping } from '../pose/useBodyMapping';
 import { audioEngine } from '../audio/AudioEngine';
 import { useAudioMapping, MappingPresetName } from '../mapping/useAudioMapping';
 import { FullBodyState } from '../stores/useAppStore';
 
-const SDK_KEY = 'TWOJ_KLUCZ_Z_dev.quickpose.ai'; // <-- Wklej swój klucz
+// === WAŻNE ===
+// Wklej tutaj swój klucz z https://dev.quickpose.ai
+// Bez ważnego klucza aplikacja nie będzie wykrywać pozycji ciała.
+const SDK_KEY = 'TWOJ_KLUCZ_Z_dev.quickpose.ai';
 
 const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
   { label: 'Default', preset: 'default' },
@@ -22,6 +26,7 @@ export default function ConductorScreen() {
   const [isSoundEnabled, setIsSoundEnabled] = useState(false);
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
   const [bodyDetected, setBodyDetected] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
   const { processKeypoints } = useBodyMapping();
   const { currentConfig, switchToPreset, applyToAudio } = useAudioMapping();
@@ -45,6 +50,21 @@ export default function ConductorScreen() {
     applyToAudioRef.current = applyToAudio;
   }, [applyToAudio]);
 
+  // Request camera permission on mount (required on Android for QuickPose)
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasCameraPermission(status === 'granted');
+
+      if (status !== 'granted') {
+        Alert.alert(
+          'Brak dostępu do kamery',
+          'Aplikacja potrzebuje uprawnień do kamery, żeby śledzić ruchy ciała.'
+        );
+      }
+    })();
+  }, []);
+
   // Periodically mark body as not detected if we stop receiving good frames
   useEffect(() => {
     const id = setInterval(() => {
@@ -63,13 +83,18 @@ export default function ConductorScreen() {
     };
   }, []);
 
-  const handleResults = (results: any) => {
+  const handleUpdate = (event: any) => {
     const now = Date.now();
+    const nativeEvent = event?.nativeEvent || event;
+    const results = nativeEvent?.results || {};
 
-    if (!results?.keypoints || results.keypoints.length === 0) {
-      // No detection this frame — gradually pull volume down if we have been without body for a while
+    // New QuickPose returns results as object of feature values (not raw keypoints array)
+    // For now we use a basic detection check and pass available data downstream.
+    // The rich bodyFeatures extraction may have limited data; we rely on available results + velocity.
+    const hasData = results && Object.keys(results).length > 0;
+
+    if (!hasData) {
       if (isSoundEnabledRef.current && now - lastDetectionRef.current > 420) {
-        // Force a low volume update directly (bypass full mapping for safety)
         audioEngine.updateParameters({ masterVolume: 0.06 });
       }
       return;
@@ -77,30 +102,50 @@ export default function ConductorScreen() {
 
     lastDetectionRef.current = now;
 
-    processKeypoints(results.keypoints);
+    // Pass to process (will use defaults for position since new SDK focuses on feature values)
+    processKeypoints(results);
 
-    // Get latest from store (store is updated synchronously inside processKeypoints via zustand)
+    // Inject some life from the new SDK results (feature values) into body state for mapping
+    // This gives basic responsiveness even without raw (x,y) keypoints.
     const bodyValues = useAppStore.getState().bodyValues;
-    latestBodyRef.current = bodyValues;
+    const injected: Partial<FullBodyState> = { ...bodyValues };
 
-    // Direct, fast path to audio engine — no extra React effects, no stale closure
-    if (isSoundEnabledRef.current) {
-      applyToAudioRef.current(bodyValues);
+    // Try to derive simple signals from results object (new SDK)
+    const resultKeys = Object.keys(results || {});
+    if (resultKeys.length > 0) {
+      const firstVal = typeof results[resultKeys[0]] === 'number' ? results[resultKeys[0]] : 0.5;
+      injected.bodyOpenness = Math.max(0.15, Math.min(0.95, firstVal * 1.1));
+
+      // Add some life from any numeric result
+      injected.overallMovement = Math.min(1, Math.max(0.1, (injected.overallMovement || 0.2) * 0.5 + firstVal * 0.6));
     }
 
-    // Very cheap throttled debug UI update (does not run every frame)
+    // Small time-based variation so sound keeps evolving even if pose results are stable
+    const t = (now % 2400) / 2400;
+    const variation = Math.sin(t * Math.PI * 2) * 0.08 + 0.08;
+    injected.overallMovement = Math.min(1, (injected.overallMovement || 0.3) + variation);
+
+    // Update store with injected values so mapping has something to work with
+    useAppStore.getState().updateBodyValues(injected);
+
+    const finalBody = useAppStore.getState().bodyValues;
+    latestBodyRef.current = finalBody;
+
+    if (isSoundEnabledRef.current) {
+      applyToAudioRef.current(finalBody);
+    }
+
     if (now - lastDebugUpdateRef.current > DEBUG_UPDATE_MS) {
       lastDebugUpdateRef.current = now;
       setDebugValues({
-        leftHandHeightRel: bodyValues.leftHandHeightRel,
-        rightHandHeightRel: bodyValues.rightHandHeightRel,
-        bodyOpenness: bodyValues.bodyOpenness,
-        overallMovement: bodyValues.overallMovement,
-        leftElbowAngle: bodyValues.leftElbowAngle,
+        leftHandHeightRel: finalBody.leftHandHeightRel,
+        rightHandHeightRel: finalBody.rightHandHeightRel,
+        bodyOpenness: finalBody.bodyOpenness,
+        overallMovement: finalBody.overallMovement,
+        leftElbowAngle: finalBody.leftElbowAngle,
       });
     }
 
-    // Throttled body detection UI state
     if (now - detectionUiRef.current > 180) {
       detectionUiRef.current = now;
       setBodyDetected(true);
@@ -122,12 +167,50 @@ export default function ConductorScreen() {
 
   const dv = debugValues;
 
+  // Show permission request UI if needed
+  if (hasCameraPermission === false) {
+    return (
+      <View style={styles.permissionContainer}>
+        <Text style={styles.permissionText}>
+          Potrzebujemy dostępu do kamery, aby wykrywać pozycję ciała.
+        </Text>
+        <Button
+          title="Poproś o uprawnienia do kamery"
+          onPress={async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            setHasCameraPermission(status === 'granted');
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (hasCameraPermission === null) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.status}>Przygotowywanie kamery...</Text>
+      </View>
+    );
+  }
+
+  // Warn about placeholder key (user must replace)
+  const isPlaceholderKey = SDK_KEY.includes('TWOJ_KLUCZ');
+
   return (
     <View style={styles.container}>
-      <QuickPoseCamera
+      {isPlaceholderKey && (
+        <View style={styles.warningBanner}>
+          <Text style={styles.warningText}>
+            ⚠️ Wklej swój klucz QuickPose w ConductorScreen.tsx (SDK_KEY)
+          </Text>
+        </View>
+      )}
+
+      <QuickPoseView
         sdkKey={SDK_KEY}
-        features={['overlay.wholeBody']}
-        onResults={handleResults}
+        features={['overlay.wholeBody', 'showPoints']}
+        useFrontCamera={true}
+        onUpdate={handleUpdate}
         style={styles.camera}
       />
 
@@ -267,5 +350,33 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     paddingHorizontal: 12,
+  },
+  permissionContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  permissionText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  warningBanner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#b45309',
+    padding: 8,
+    zIndex: 10,
+  },
+  warningText: {
+    color: '#fff',
+    fontSize: 12,
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });

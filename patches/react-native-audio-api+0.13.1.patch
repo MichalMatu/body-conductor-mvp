@@ -1,0 +1,94 @@
+diff --git a/node_modules/react-native-audio-api/android/src/main/cpp/audioapi/android/core/utils/FileOptions.cpp b/node_modules/react-native-audio-api/android/src/main/cpp/audioapi/android/core/utils/FileOptions.cpp
+index 1111111..2222222 100644
+--- a/node_modules/react-native-audio-api/android/src/main/cpp/audioapi/android/core/utils/FileOptions.cpp
++++ b/node_modules/react-native-audio-api/android/src/main/cpp/audioapi/android/core/utils/FileOptions.cpp
+@@ -3,8 +3,8 @@
+ #include <audioapi/android/system/NativeFileInfo.hpp>
+ #include <audioapi/utils/AudioFileProperties.h>
+ #include <chrono>
++#include <ctime>
+ #include <filesystem>
+-#include <format>
+ #include <iostream>
+ #include <memory>
+ #include <string>
+@@ -33,7 +33,12 @@ Result<NoneType, std::string> createDirectoryIfNotExists(const std::string &dir
+ 
+ std::string getTimestampString() {
+   auto tNow = std::chrono::system_clock::now();
+-  return std::format("{:%Y%m%d_%H%M%S}", std::chrono::floor<std::chrono::seconds>(tNow));
++  auto time = std::chrono::system_clock::to_time_t(std::chrono::floor<std::chrono::seconds>(tNow));
++  std::tm tm{};
++  localtime_r(&time, &tm);
++  char buf[32];
++  std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", &tm);
++  return std::string(buf);
+ }
+ 
+ std::string getDirectory(const std::shared_ptr<AudioFileProperties> &properties) {
+@@ -66,7 +71,7 @@ Result<std::string, std::string> getFilePath(
+     const std::shared_ptr<AudioFileProperties> &properties,
+     const std::string &fileNameOverride) {
+   std::string directory = getDirectory(properties);
+-  std::string subDirectory = std::format("{}/{}", directory, properties->subDirectory);
++  std::string subDirectory = directory + "/" + properties->subDirectory;
+   std::string fileTimestamp = getTimestampString();
+   std::string extension = getFileExtension(properties);
+ 
+@@ -77,9 +82,8 @@ Result<std::string, std::string> getFilePath(
+   }
+ 
+   auto filePath = !fileNameOverride.empty() && properties->rotateIntervalBytes == 0
+-      ? std::format("{}/{}.{}", subDirectory, fileNameOverride, extension)
+-      : std::format(
+-            "{}/{}_{}.{}", subDirectory, properties->fileNamePrefix, fileTimestamp, extension);
++      ? subDirectory + "/" + fileNameOverride + "." + extension
++      : subDirectory + "/" + properties->fileNamePrefix + "_" + fileTimestamp + "." + extension;
+ 
+   return Result<std::string, std::string>::Ok(filePath);
+ }
+diff --git a/node_modules/react-native-audio-api/common/cpp/audioapi/core/sources/AudioFileSourceNode.cpp b/node_modules/react-native-audio-api/common/cpp/audioapi/core/sources/AudioFileSourceNode.cpp
+index 5555555..6666666 100644
+--- a/node_modules/react-native-audio-api/common/cpp/audioapi/core/sources/AudioFileSourceNode.cpp
++++ b/node_modules/react-native-audio-api/common/cpp/audioapi/core/sources/AudioFileSourceNode.cpp
+@@ -82,7 +82,9 @@ void AudioFileSourceNode::sendOnPositionChangedEvent(int framesPlayed) {
+ 
+ void AudioFileSourceNode::sendOnPositionChangedEvent(int framesPlayed) {
+   const double delta = static_cast<double>(framesPlayed) / sampleRate_;
+-  const double position = currentTime_.fetch_add(delta) + delta;
++  const double previous = currentTime_.load(std::memory_order_relaxed);
++  currentTime_.store(previous + delta, std::memory_order_relaxed);
++  const double position = previous + delta;
+   positionChanged_.advance(framesPlayed, position);
+ }
+ 
+diff --git a/node_modules/react-native-audio-api/android/src/main/java/com/swmansion/audioapi/AudioAPIModule.kt b/node_modules/react-native-audio-api/android/src/main/java/com/swmansion/audioapi/AudioAPIModule.kt
+index 3333333..4444444 100644
+--- a/node_modules/react-native-audio-api/android/src/main/java/com/swmansion/audioapi/AudioAPIModule.kt
++++ b/node_modules/react-native-audio-api/android/src/main/java/com/swmansion/audioapi/AudioAPIModule.kt
+@@ -37,14 +37,14 @@ class AudioAPIModule(
+ 
+   private lateinit var mHybridData: HybridData
+ 
+-  @OptIn(markerClass = [FrameworkAPI::class])
++  @OptIn(FrameworkAPI::class)
+   private external fun initHybrid(
+     workletsModule: Any?,
+     jsContext: Long,
+     callInvoker: CallInvokerHolderImpl,
+   ): HybridData
+ 
+-  @OptIn(markerClass = [FrameworkAPI::class])
++  @OptIn(FrameworkAPI::class)
+   private external fun injectJSIBindings()
+ 
+   external fun invokeHandlerWithEventNameAndEventBody(
+@@ -60,7 +60,7 @@ class AudioAPIModule(
+     }
+   }
+ 
+-  @OptIn(markerClass = [FrameworkAPI::class])
++  @OptIn(FrameworkAPI::class)
+   override fun install(): Boolean {
+     val context = reactContext.get() ?: return false
+     context.assertOnJSQueueThread()

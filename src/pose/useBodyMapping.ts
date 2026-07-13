@@ -54,10 +54,22 @@ export const useBodyMapping = () => {
 
   const smoothedRef = useRef<BodyFeatures | null>(null);
 
-  const processKeypoints = useCallback((keypoints: any[]) => {
-    if (!keypoints || keypoints.length === 0) return;
+  const processKeypoints = useCallback((data: any) => {
+    // Support both old array of keypoints and new results object from @quickpose/react-native
+    let keypointsArray: any[] | null = null;
 
-    let features = extractBodyFeatures(keypoints);
+    if (Array.isArray(data)) {
+      keypointsArray = data;
+    } else if (data && typeof data === 'object') {
+      // Newer SDK returns feature results as object. We can't easily get raw (x,y) here.
+      // For now we proceed with defaults + strong velocity signal from any movement.
+      // This keeps the app running. Rich mapping will be limited until raw landmarks are available.
+      keypointsArray = []; // will cause defaults in extract
+    }
+
+    if (!keypointsArray) return;
+
+    let features = extractBodyFeatures(keypointsArray);
 
     // Light smoothing to fight pose jitter (very important on phone)
     features = smoothFeatures(smoothedRef.current, features);

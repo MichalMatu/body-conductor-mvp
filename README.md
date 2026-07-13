@@ -13,11 +13,21 @@ Elastyczny system mapowania pozycji całego ciała na generator dźwięku (spati
    ```bash
    cd ios && pod install
    ```
-4. Wklej swój klucz QuickPose w pliku `src/screens/ConductorScreen.tsx` (zmienna `SDK_KEY`)
-5. Uruchom:
-   ```bash
-   npx expo start
-   ```
+4. **Wklej swój klucz QuickPose** w pliku `src/screens/ConductorScreen.tsx` (zmienna `SDK_KEY`).
+   Bez ważnego klucza z https://dev.quickpose.ai aplikacja nie wykryje ciała.
+
+5. Dla Androida (Samsung S22 Plus):
+   - Upewnij się, że telefon jest podłączony przez USB z włączonym debugowaniem.
+   - Uruchom build:
+     ```bash
+     npx expo run:android --device
+     ```
+     lub
+     ```bash
+     cd android && ./gradlew assembleDebug && adb install -r app/build/outputs/apk/debug/app-debug.apk
+     ```
+
+   Uwaga: Wymagany development build (nie działa w Expo Go ze względu na natywne moduły QuickPose + react-native-audio-api).
 
 ## Co działa w tym MVP (rozbudowany)
 
