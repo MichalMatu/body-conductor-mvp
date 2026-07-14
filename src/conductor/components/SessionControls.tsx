@@ -82,7 +82,7 @@ export function SessionControls({
           disabled={isAudioStarting}
         />
         <View style={styles.actionSpacer} />
-        <Button title="Zakończ sesję" onPress={onEndSession} color="#b45309" />
+        <Button title="Zatrzymaj sesję" onPress={onEndSession} color="#b45309" />
       </View>
 
       <Text style={styles.debugSmall}>

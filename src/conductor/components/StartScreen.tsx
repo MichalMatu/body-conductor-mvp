@@ -10,8 +10,11 @@ export function StartScreen({ onStart }: StartScreenProps) {
   return (
     <View style={styles.startContainer}>
       <Text style={styles.startTitle}>Body Conductor</Text>
-      <Text style={styles.startSubtitle}>MediaPipe — ruch ciała steruje dźwiękiem</Text>
-      <Button title="Rozpocznij teraz" onPress={onStart} />
+      <Text style={styles.startSubtitle}>
+        Stań przed kamerą i steruj dźwiękiem ruchem ciała.{'\n'}
+        Kamera włączy się dopiero po rozpoczęciu sesji.
+      </Text>
+      <Button title="Rozpocznij sesję" onPress={onStart} />
     </View>
   );
 }

@@ -4,6 +4,7 @@
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
+    "start:dev": "lsof -ti:8081 | xargs kill -9 2>/dev/null; adb reverse tcp:8081 tcp:8081 2>/dev/null; expo start --dev-client --localhost",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",

@@ -19,11 +19,7 @@ export default function ConductorScreen() {
   const { processPoseFrame } = useBodyMapping();
   const { currentConfig, switchToPreset, applyToAudio } = useAudioMapping();
 
-  const activateSession = useCallback(() => {
-    setSessionActive(true);
-  }, []);
-
-  const { hasPermission, requestPermission } = useCameraPermission(activateSession);
+  const { hasPermission, requestPermission } = useCameraPermission();
 
   const audioSession = useAudioSession({ applyToAudio, lastBodyStateRef });
 
