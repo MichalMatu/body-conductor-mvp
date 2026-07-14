@@ -55,6 +55,7 @@ Elastyczny system mapowania pozycji całego ciała na generator dźwięku (spati
 
 Szczegóły techniczne w katalogu [`docs/`](./docs/):
 
+- [Wizja produktu — air DJ, gesty, rynek](./docs/idea.md)
 - [Szkielet, overlay i dane z API](./docs/SKELETON_AND_POSE_DATA.md)
 - [Plan optymalizacji wydajności](./docs/OPTIMIZATION_PLAN.md)
 
