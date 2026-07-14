@@ -51,11 +51,18 @@ Elastyczny system mapowania pozycji całego ciała na generator dźwięku (spati
 - Zaimplementuj prawdziwy 3D PannerNode gdy biblioteka go w pełni wspiera
 - UI do edycji mapowań na żywo
 
+## Dokumentacja
+
+Szczegóły techniczne w katalogu [`docs/`](./docs/):
+
+- [Szkielet, overlay i dane z API](./docs/SKELETON_AND_POSE_DATA.md)
+- [Plan optymalizacji wydajności](./docs/OPTIMIZATION_PLAN.md)
+
 ## Pliki warte uwagi
 
-- `src/audio/AudioEngine.ts` – silnik dźwiękowy
-- `src/pose/useBodyMapping.ts` – przetwarzanie pozycji ciała
-- `src/pose/PoseCameraView.tsx` – kamera MediaPipe
-- `src/screens/ConductorScreen.tsx` – główny ekran aplikacji
+- `src/audio/engine/AudioEngine.ts` – silnik dźwiękowy
+- `src/pose/pipeline/useBodyMapping.ts` – przetwarzanie pozycji ciała
+- `src/pose/camera/PoseCameraView.tsx` – kamera MediaPipe
+- `src/conductor/screens/ConductorScreen.tsx` – główny ekran aplikacji
 
 Powodzenia! To solidny szkielet pod dalszą rozbudowę.
