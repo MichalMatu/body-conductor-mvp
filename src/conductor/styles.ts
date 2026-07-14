@@ -60,19 +60,19 @@ export const conductorStyles = StyleSheet.create({
   controls: {
     paddingTop: 12,
     paddingBottom: 10,
-    paddingLeft: 16,
-    paddingRight: 8,
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    alignItems: 'stretch',
   },
   actionRow: {
     width: '100%',
     minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingRight: 22,
     marginBottom: 6,
     position: 'relative',
+  },
+  actionRowCenter: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   status: {
     color: '#fff',

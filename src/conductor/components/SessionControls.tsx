@@ -19,7 +19,9 @@ export function SessionControls({
   return (
     <View style={styles.controls}>
       <View style={styles.actionRow}>
-        <Button title="Zatrzymaj sesję" onPress={onEndSession} color="#b45309" />
+        <View style={styles.actionRowCenter}>
+          <Button title="Zatrzymaj sesję" onPress={onEndSession} color="#b45309" />
+        </View>
         <BodyDetectionIndicator bodyDetected={bodyDetected} style={styles.bodyIndicatorEdge} />
       </View>
 
