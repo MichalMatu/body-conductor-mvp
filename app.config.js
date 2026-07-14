@@ -21,6 +21,7 @@ module.exports = {
       ]
     },
     plugins: [
+      "expo-asset",
       [
         "react-native-audio-api",
         {

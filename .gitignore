@@ -29,8 +29,11 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files (API keys, secrets)
+.env
+.env.local
 .env*.local
+!.env.example
 
 # typescript
 *.tsbuildinfo
@@ -43,3 +46,4 @@ android/
 *.log
 coverage/
 *.tgz
+docs/screenshots/

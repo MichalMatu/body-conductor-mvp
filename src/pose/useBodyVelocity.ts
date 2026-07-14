@@ -1,24 +1,13 @@
-/**
- * useBodyVelocity.ts
- * 
- * Tracks smoothed velocity of selected body features over time.
- * This allows mapping "how fast you move" in addition to "where you are".
- * 
- * Very powerful for musical expression (e.g. fast swipe = brighter / louder).
- */
-
 import { useRef, useCallback } from 'react';
 import { BodyFeatures } from './bodyFeatures';
+import { VELOCITY_SMOOTH, MAX_SPEED } from './sensitivity';
 
 export interface VelocityFeatures {
-  leftHandSpeed: number;   // 0-1+
+  leftHandSpeed: number;
   rightHandSpeed: number;
   handsSpreadSpeed: number;
-  overallMovement: number; // combined energy
+  overallMovement: number;
 }
-
-const SMOOTHING = 0.25; // lower = more smoothing
-const MAX_SPEED = 2.2;   // normalization cap
 
 interface History {
   leftY: number;
@@ -58,16 +47,16 @@ export function useBodyVelocity() {
     const dRight = Math.abs(current.rightY - prev.rightY) / dt;
     const dSpread = Math.abs(current.handsDist - prev.handsDist) / dt;
 
-    // Smooth and normalize
     const smooth = (prevVal: number, newVal: number) =>
-      prevVal * (1 - SMOOTHING) + Math.min(newVal / MAX_SPEED, 1) * SMOOTHING;
+      prevVal * (1 - VELOCITY_SMOOTH) +
+      Math.min(newVal / MAX_SPEED, 1) * VELOCITY_SMOOTH;
 
     const leftSpeed = smooth(velocitiesRef.current.leftHandSpeed, dLeft);
     const rightSpeed = smooth(velocitiesRef.current.rightHandSpeed, dRight);
     const spreadSpeed = smooth(velocitiesRef.current.handsSpreadSpeed, dSpread);
 
     const overall = Math.min(
-      (leftSpeed * 0.4 + rightSpeed * 0.4 + spreadSpeed * 0.2),
+      leftSpeed * 0.4 + rightSpeed * 0.4 + spreadSpeed * 0.2,
       1
     );
 
@@ -85,4 +74,4 @@ export function useBodyVelocity() {
   }, []);
 
   return { computeVelocity };
-}
+};

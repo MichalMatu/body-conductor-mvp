@@ -274,12 +274,14 @@ export class AudioEngine {
     try {
       if (this.voice1?.oscillator) this.voice1.oscillator.stop();
       if (this.voice2?.oscillator) this.voice2.oscillator.stop();
-    } catch (e) {
-      // ignore
+      if (this.voice3?.oscillator) this.voice3.oscillator.stop();
+    } catch {
+      // Oscillators may already be stopped.
     }
 
     this.voice1 = null;
     this.voice2 = null;
+    this.voice3 = null;
     this.filter = null;
     this.delay = null;
     this.delayFeedback = null;

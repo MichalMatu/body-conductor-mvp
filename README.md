@@ -13,8 +13,11 @@ Elastyczny system mapowania pozycji całego ciała na generator dźwięku (spati
    ```bash
    cd ios && pod install
    ```
-4. **Wklej swój klucz QuickPose** w pliku `src/screens/ConductorScreen.tsx` (zmienna `SDK_KEY`).
-   Bez ważnego klucza z https://dev.quickpose.ai aplikacja nie wykryje ciała.
+4. **Skonfiguruj klucz QuickPose** — skopiuj `.env.example` do `.env` i wklej klucz z https://dev.quickpose.ai:
+   ```bash
+   cp .env.example .env
+   ```
+   Bez ważnego klucza aplikacja nie wykryje ciała. Plik `.env` nie trafia do gita.
 
 5. Dla Androida (Samsung S22 Plus):
    - Upewnij się, że telefon jest podłączony przez USB z włączonym debugowaniem.

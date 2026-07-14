@@ -10,9 +10,13 @@
  */
 
 import { BodyFeatures } from '../pose/bodyFeatures';
+import { VelocityFeatures } from '../pose/useBodyVelocity';
 
 /** All available body features that can be used as input */
 export type BodyFeatureName = keyof BodyFeatures;
+
+/** Body + velocity features available to mapping rules */
+export type MappingSourceName = keyof (BodyFeatures & VelocityFeatures);
 
 /** Named audio parameters that the AudioEngine exposes for control */
 export type AudioParameter =
@@ -36,8 +40,8 @@ export type AudioParameter =
 
 /** A single mapping rule from one body feature to one audio parameter */
 export interface MappingRule {
-  /** Which body feature to read */
-  source: BodyFeatureName;
+  /** Which body or velocity feature to read */
+  source: MappingSourceName;
 
   /** Which audio parameter to write */
   target: AudioParameter;
@@ -75,7 +79,7 @@ export type AudioParameters = Partial<Record<AudioParameter, number>>;
  * Helper to create a simple linear mapping rule.
  */
 export function createLinearRule(
-  source: BodyFeatureName,
+  source: MappingSourceName,
   target: AudioParameter,
   inputMin: number,
   inputMax: number,

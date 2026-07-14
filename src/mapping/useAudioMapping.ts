@@ -13,11 +13,8 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { audioEngine } from '../audio/AudioEngine';
-import {
-  applyMapping,
-  defaultMappingConfig,
-  MappingConfig,
-} from './MappingEngine';
+import { applyMapping } from './MappingEngine';
+import { MappingConfig } from './types';
 import { presets, getPreset } from './presets';
 import { AudioParameters } from './types';
 import { FullBodyState } from '../stores/useAppStore';
@@ -25,7 +22,7 @@ import { FullBodyState } from '../stores/useAppStore';
 export type MappingPresetName = keyof typeof presets;
 
 export function useAudioMapping() {
-  const [config, setConfig] = useState<MappingConfig>(defaultMappingConfig);
+  const [config, setConfig] = useState<MappingConfig>(presets.default);
   const lastParamsRef = useRef<AudioParameters>({});
 
   /**

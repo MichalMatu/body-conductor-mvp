@@ -1,11 +1,12 @@
 import { useCallback, useRef } from 'react';
-import { useAppStore } from '../stores/useAppStore';
+import type { QuickPoseResults } from '@quickpose/react-native';
+import { FullBodyState } from '../stores/useAppStore';
 import { extractBodyFeatures, BodyFeatures } from './bodyFeatures';
+import { deriveSignalsFromQuickPose } from './parseQuickPoseResults';
+import { FEATURE_SMOOTH } from './sensitivity';
 import { useBodyVelocity } from './useBodyVelocity';
 
 export type { BodyFeatures };
-
-const FEATURE_SMOOTH = 0.35; // 0 = no smoothing, higher = more stable but less responsive (good for phone jitter)
 
 function smoothFeatures(
   prev: BodyFeatures | null,
@@ -14,9 +15,8 @@ function smoothFeatures(
   if (!prev) return next;
 
   const s = FEATURE_SMOOTH;
-  const out: any = { ...next };
+  const out = { ...next };
 
-  // Smooth numeric fields that benefit from stability
   const keysToSmooth: (keyof BodyFeatures)[] = [
     'leftHandHeightRel', 'rightHandHeightRel',
     'leftHandSide', 'rightHandSide',
@@ -25,62 +25,87 @@ function smoothFeatures(
   ];
 
   for (const k of keysToSmooth) {
-    const p = (prev as any)[k] as number;
-    const n = (next as any)[k] as number;
-    out[k] = p * (1 - s) + n * s;
+    out[k] = prev[k] * (1 - s) + next[k] * s;
   }
 
-  // Keep raw wrist positions less smoothed for direct mapping if desired
-  out.leftWristY = next.leftWristY;
-  out.rightWristY = next.rightWristY;
-  out.leftWristX = next.leftWristX;
-  out.rightWristX = next.rightWristX;
-  out.shoulderWidth = next.shoulderWidth;
-  out.handsVerticalDiff = next.handsVerticalDiff;
-
-  return out as BodyFeatures;
+  return out;
 }
 
+const initialBody: FullBodyState = {
+  leftWristY: 0.5,
+  rightWristY: 0.5,
+  leftWristX: 0.3,
+  rightWristX: 0.7,
+  leftHandHeightRel: 0,
+  rightHandHeightRel: 0,
+  leftHandSide: -0.5,
+  rightHandSide: 0.5,
+  handsDistance: 0.2,
+  shoulderWidth: 0.25,
+  leftElbowAngle: 90,
+  rightElbowAngle: 90,
+  handsVerticalDiff: 0,
+  bodyOpenness: 0.5,
+  torsoCenterY: 0.6,
+  leftHandSpeed: 0,
+  rightHandSpeed: 0,
+  handsSpreadSpeed: 0,
+  overallMovement: 0,
+};
+
 /**
- * useBodyMapping
- * 
- * Processes QuickPose results → rich body features + velocities.
- * Includes light exponential smoothing to reduce camera jitter on real devices.
+ * Processes QuickPose feature results into a stable FullBodyState for mapping.
+ * Avoids Zustand updates on every frame — returns state directly to the caller.
  */
 export const useBodyMapping = () => {
-  const updateBodyValues = useAppStore((state) => state.updateBodyValues);
-  const updateVelocities = useAppStore((state) => state.updateVelocities);
   const { computeVelocity } = useBodyVelocity();
-
   const smoothedRef = useRef<BodyFeatures | null>(null);
+  const lastStateRef = useRef<FullBodyState>(initialBody);
 
-  const processKeypoints = useCallback((data: any) => {
-    // Support both old array of keypoints and new results object from @quickpose/react-native
-    let keypointsArray: any[] | null = null;
+  const processQuickPoseResults = useCallback(
+    (results: QuickPoseResults): { bodyState: FullBodyState; detected: boolean } => {
+      const derived = deriveSignalsFromQuickPose(results);
 
-    if (Array.isArray(data)) {
-      keypointsArray = data;
-    } else if (data && typeof data === 'object') {
-      // Newer SDK returns feature results as object. We can't easily get raw (x,y) here.
-      // For now we proceed with defaults + strong velocity signal from any movement.
-      // This keeps the app running. Rich mapping will be limited until raw landmarks are available.
-      keypointsArray = []; // will cause defaults in extract
-    }
+      if (!derived.detected) {
+        const faded: FullBodyState = {
+          ...lastStateRef.current,
+          overallMovement: lastStateRef.current.overallMovement * 0.85,
+          leftHandSpeed: lastStateRef.current.leftHandSpeed * 0.85,
+          rightHandSpeed: lastStateRef.current.rightHandSpeed * 0.85,
+          handsSpreadSpeed: lastStateRef.current.handsSpreadSpeed * 0.85,
+        };
+        lastStateRef.current = faded;
+        return { bodyState: faded, detected: false };
+      }
 
-    if (!keypointsArray) return;
+      let features = extractBodyFeatures([]);
 
-    let features = extractBodyFeatures(keypointsArray);
+      if (derived.leftElbowAngle !== undefined) {
+        features.leftElbowAngle = derived.leftElbowAngle;
+      }
+      if (derived.rightElbowAngle !== undefined) {
+        features.rightElbowAngle = derived.rightElbowAngle;
+      }
+      if (derived.leftHandHeightRel !== undefined) {
+        features.leftHandHeightRel = derived.leftHandHeightRel;
+      }
+      if (derived.rightHandHeightRel !== undefined) {
+        features.rightHandHeightRel = derived.rightHandHeightRel;
+      }
+      if (derived.bodyOpenness !== undefined) {
+        features.bodyOpenness = derived.bodyOpenness;
+      }
 
-    // Light smoothing to fight pose jitter (very important on phone)
-    features = smoothFeatures(smoothedRef.current, features);
-    smoothedRef.current = features;
+      features = smoothFeatures(smoothedRef.current, features);
+      smoothedRef.current = features;
 
-    updateBodyValues(features);
+      const velocities = computeVelocity(features);
+      const state: FullBodyState = { ...features, ...velocities };
+      lastStateRef.current = state;
+      return { bodyState: state, detected: true };
+    },
+    [computeVelocity]
+  );
 
-    // Compute and inject movement velocities (velocity is intentionally less smoothed)
-    const velocities = computeVelocity(features);
-    updateVelocities(velocities);
-  }, [updateBodyValues, updateVelocities, computeVelocity]);
-
-  return { processKeypoints };
+  return { processQuickPoseResults };
 };

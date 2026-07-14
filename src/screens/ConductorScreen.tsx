@@ -1,17 +1,33 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  PermissionsAndroid,
+  Platform,
+} from 'react-native';
 import { QuickPoseView } from '@quickpose/react-native';
-import * as Camera from 'expo-camera';
-import { useAppStore } from '../stores/useAppStore';
 import { useBodyMapping } from '../pose/useBodyMapping';
 import { audioEngine } from '../audio/AudioEngine';
 import { useAudioMapping, MappingPresetName } from '../mapping/useAudioMapping';
 import { FullBodyState } from '../stores/useAppStore';
+import { QUICKPOSE_SDK_KEY, isQuickPoseKeyConfigured } from '../config/env';
+import {
+  DEBUG_UPDATE_MS,
+  DETECTION_UI_MS,
+  DETECTION_TIMEOUT_MS,
+} from '../pose/sensitivity';
 
-// === WAŻNE ===
-// Wklej tutaj swój klucz z https://dev.quickpose.ai
-// Bez ważnego klucza aplikacja nie będzie wykrywać pozycji ciała.
-const SDK_KEY = 'TWOJ_KLUCZ_Z_dev.quickpose.ai';
+const QUICKPOSE_FEATURES = [
+  'overlay.wholeBody',
+  'showPoints',
+  'rangeOfMotion.elbow.left',
+  'rangeOfMotion.elbow.right',
+  'rangeOfMotion.shoulder.left',
+  'rangeOfMotion.shoulder.right',
+];
 
 const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
   { label: 'Default', preset: 'default' },
@@ -19,29 +35,21 @@ const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
   { label: 'Atmospheric', preset: 'atmospheric' },
 ];
 
-// Throttle interval for cheap debug UI (prevents re-renders on every frame)
-const DEBUG_UPDATE_MS = 140;
-
 export default function ConductorScreen() {
   const [isSoundEnabled, setIsSoundEnabled] = useState(false);
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
   const [bodyDetected, setBodyDetected] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
-  const { processKeypoints } = useBodyMapping();
+  const { processQuickPoseResults } = useBodyMapping();
   const { currentConfig, switchToPreset, applyToAudio } = useAudioMapping();
 
-  // Refs to avoid stale closures in the high-frequency handleResults callback from native camera
   const isSoundEnabledRef = useRef(isSoundEnabled);
   const applyToAudioRef = useRef(applyToAudio);
-
-  // Keep latest body state in ref so we can read it without causing re-renders
-  const latestBodyRef = useRef<FullBodyState | null>(null);
   const lastDebugUpdateRef = useRef(0);
   const lastDetectionRef = useRef(Date.now());
   const detectionUiRef = useRef(0);
 
-  // Keep refs in sync
   useEffect(() => {
     isSoundEnabledRef.current = isSoundEnabled;
   }, [isSoundEnabled]);
@@ -50,32 +58,35 @@ export default function ConductorScreen() {
     applyToAudioRef.current = applyToAudio;
   }, [applyToAudio]);
 
-  // Request camera permission on mount (required on Android for QuickPose)
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(status === 'granted');
-
-      if (status !== 'granted') {
-        Alert.alert(
-          'Brak dostępu do kamery',
-          'Aplikacja potrzebuje uprawnień do kamery, żeby śledzić ruchy ciała.'
-        );
+      if (Platform.OS !== 'android') {
+        setHasCameraPermission(true);
+        return;
       }
+
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Dostęp do kamery',
+          message: 'Body Conductor potrzebuje kamery, aby śledzić ruchy Twojego ciała.',
+          buttonPositive: 'Zezwól',
+          buttonNegative: 'Anuluj',
+        }
+      );
+      setHasCameraPermission(granted === PermissionsAndroid.RESULTS.GRANTED);
     })();
   }, []);
 
-  // Periodically mark body as not detected if we stop receiving good frames
   useEffect(() => {
     const id = setInterval(() => {
-      if (Date.now() - lastDetectionRef.current > 650) {
+      if (Date.now() - lastDetectionRef.current > DETECTION_TIMEOUT_MS) {
         setBodyDetected(false);
       }
     }, 280);
     return () => clearInterval(id);
   }, []);
 
-  // Inicjalizacja audio
   useEffect(() => {
     audioEngine.init();
     return () => {
@@ -83,17 +94,12 @@ export default function ConductorScreen() {
     };
   }, []);
 
-  const handleUpdate = (event: any) => {
+  const handleUpdate = (event: { nativeEvent?: { results?: Record<string, number> } }) => {
     const now = Date.now();
-    const nativeEvent = event?.nativeEvent || event;
-    const results = nativeEvent?.results || {};
+    const results = event.nativeEvent?.results ?? {};
+    const { bodyState, detected } = processQuickPoseResults(results);
 
-    // New QuickPose returns results as object of feature values (not raw keypoints array)
-    // For now we use a basic detection check and pass available data downstream.
-    // The rich bodyFeatures extraction may have limited data; we rely on available results + velocity.
-    const hasData = results && Object.keys(results).length > 0;
-
-    if (!hasData) {
+    if (!detected) {
       if (isSoundEnabledRef.current && now - lastDetectionRef.current > 420) {
         audioEngine.updateParameters({ masterVolume: 0.06 });
       }
@@ -102,51 +108,22 @@ export default function ConductorScreen() {
 
     lastDetectionRef.current = now;
 
-    // Pass to process (will use defaults for position since new SDK focuses on feature values)
-    processKeypoints(results);
-
-    // Inject some life from the new SDK results (feature values) into body state for mapping
-    // This gives basic responsiveness even without raw (x,y) keypoints.
-    const bodyValues = useAppStore.getState().bodyValues;
-    const injected: Partial<FullBodyState> = { ...bodyValues };
-
-    // Try to derive simple signals from results object (new SDK)
-    const resultKeys = Object.keys(results || {});
-    if (resultKeys.length > 0) {
-      const firstVal = typeof results[resultKeys[0]] === 'number' ? results[resultKeys[0]] : 0.5;
-      injected.bodyOpenness = Math.max(0.15, Math.min(0.95, firstVal * 1.1));
-
-      // Add some life from any numeric result
-      injected.overallMovement = Math.min(1, Math.max(0.1, (injected.overallMovement || 0.2) * 0.5 + firstVal * 0.6));
-    }
-
-    // Small time-based variation so sound keeps evolving even if pose results are stable
-    const t = (now % 2400) / 2400;
-    const variation = Math.sin(t * Math.PI * 2) * 0.08 + 0.08;
-    injected.overallMovement = Math.min(1, (injected.overallMovement || 0.3) + variation);
-
-    // Update store with injected values so mapping has something to work with
-    useAppStore.getState().updateBodyValues(injected);
-
-    const finalBody = useAppStore.getState().bodyValues;
-    latestBodyRef.current = finalBody;
-
     if (isSoundEnabledRef.current) {
-      applyToAudioRef.current(finalBody);
+      applyToAudioRef.current(bodyState);
     }
 
     if (now - lastDebugUpdateRef.current > DEBUG_UPDATE_MS) {
       lastDebugUpdateRef.current = now;
       setDebugValues({
-        leftHandHeightRel: finalBody.leftHandHeightRel,
-        rightHandHeightRel: finalBody.rightHandHeightRel,
-        bodyOpenness: finalBody.bodyOpenness,
-        overallMovement: finalBody.overallMovement,
-        leftElbowAngle: finalBody.leftElbowAngle,
+        leftHandHeightRel: bodyState.leftHandHeightRel,
+        rightHandHeightRel: bodyState.rightHandHeightRel,
+        bodyOpenness: bodyState.bodyOpenness,
+        overallMovement: bodyState.overallMovement,
+        leftElbowAngle: bodyState.leftElbowAngle,
       });
     }
 
-    if (now - detectionUiRef.current > 180) {
+    if (now - detectionUiRef.current > DETECTION_UI_MS) {
       detectionUiRef.current = now;
       setBodyDetected(true);
     }
@@ -161,13 +138,6 @@ export default function ConductorScreen() {
     setIsSoundEnabled(!isSoundEnabled);
   };
 
-  const handlePresetPress = (preset: MappingPresetName) => {
-    switchToPreset(preset);
-  };
-
-  const dv = debugValues;
-
-  // Show permission request UI if needed
   if (hasCameraPermission === false) {
     return (
       <View style={styles.permissionContainer}>
@@ -177,8 +147,10 @@ export default function ConductorScreen() {
         <Button
           title="Poproś o uprawnienia do kamery"
           onPress={async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setHasCameraPermission(status === 'granted');
+            const granted = await PermissionsAndroid.request(
+              PermissionsAndroid.PERMISSIONS.CAMERA
+            );
+            setHasCameraPermission(granted === PermissionsAndroid.RESULTS.GRANTED);
           }}
         />
       </View>
@@ -193,22 +165,21 @@ export default function ConductorScreen() {
     );
   }
 
-  // Warn about placeholder key (user must replace)
-  const isPlaceholderKey = SDK_KEY.includes('TWOJ_KLUCZ');
+  const dv = debugValues;
 
   return (
     <View style={styles.container}>
-      {isPlaceholderKey && (
+      {!isQuickPoseKeyConfigured && (
         <View style={styles.warningBanner}>
           <Text style={styles.warningText}>
-            ⚠️ Wklej swój klucz QuickPose w ConductorScreen.tsx (SDK_KEY)
+            ⚠️ Ustaw EXPO_PUBLIC_QUICKPOSE_SDK_KEY w pliku .env (patrz .env.example)
           </Text>
         </View>
       )}
 
       <QuickPoseView
-        sdkKey={SDK_KEY}
-        features={['overlay.wholeBody', 'showPoints']}
+        sdkKey={QUICKPOSE_SDK_KEY}
+        features={QUICKPOSE_FEATURES}
         useFrontCamera={true}
         onUpdate={handleUpdate}
         style={styles.camera}
@@ -223,11 +194,8 @@ export default function ConductorScreen() {
           </Text>
         </Text>
 
-        <Text style={styles.mappingName}>
-          {currentConfig.name}
-        </Text>
+        <Text style={styles.mappingName}>{currentConfig.name}</Text>
 
-        {/* Preset switcher */}
         <View style={styles.presetRow}>
           {PRESET_BUTTONS.map(({ label, preset }) => (
             <TouchableOpacity
@@ -236,7 +204,7 @@ export default function ConductorScreen() {
                 styles.presetButton,
                 currentConfig.id.startsWith(preset) && styles.presetButtonActive,
               ]}
-              onPress={() => handlePresetPress(preset)}
+              onPress={() => switchToPreset(preset)}
               disabled={!isSoundEnabled}
             >
               <Text
@@ -256,26 +224,27 @@ export default function ConductorScreen() {
           onPress={toggleSound}
         />
 
-        {/* Lightweight throttled debug (updates ~7x per second max) */}
         {dv.leftHandHeightRel !== undefined && (
           <>
             <Text style={styles.debug}>
-              L-Hand↑: {dv.leftHandHeightRel.toFixed(2)} | R-Hand↑: {dv.rightHandHeightRel?.toFixed(2)}
+              L-Hand↑: {dv.leftHandHeightRel.toFixed(2)} | R-Hand↑:{' '}
+              {dv.rightHandHeightRel?.toFixed(2)}
             </Text>
             <Text style={styles.debugSmall}>
-              Open: {dv.bodyOpenness?.toFixed(2)} | Move: {dv.overallMovement?.toFixed(2)} | L-Elb: {dv.leftElbowAngle?.toFixed(0)}°
+              Open: {dv.bodyOpenness?.toFixed(2)} | Move: {dv.overallMovement?.toFixed(2)} | L-Elb:{' '}
+              {dv.leftElbowAngle?.toFixed(0)}°
             </Text>
           </>
         )}
 
         <Text style={styles.hint}>
-          Podnoś ręce → wysokość | Rozkładaj ręce → przestrzeń i delay | Ruszaj się energicznie → głośniej + jaśniej
+          Podnoś ręce → wysokość | Rozkładaj ręce → przestrzeń i delay | Ruszaj się energicznie →
+          głośniej + jaśniej
         </Text>
       </View>
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
