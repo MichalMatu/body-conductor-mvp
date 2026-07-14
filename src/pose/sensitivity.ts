@@ -1,5 +1,5 @@
 /** Pose feature exponential smoothing (0 = raw, 1 = frozen). */
-export const FEATURE_SMOOTH = 0.32;
+export const FEATURE_SMOOTH = 0.48;
 
 /** Velocity low-pass smoothing. */
 export const VELOCITY_SMOOTH = 0.28;
@@ -14,7 +14,7 @@ export const DETECTION_THRESHOLD = 0.06;
 export const ROM_DETECTION_THRESHOLD = 1;
 
 /** Min interval between pose/audio processing (~6 fps). */
-export const POSE_PROCESS_MS = 160;
+export const POSE_PROCESS_MS = 100;
 
 /** How often the status row is synced from refs to React state (ms). */
 export const UI_SYNC_MS = 1500;

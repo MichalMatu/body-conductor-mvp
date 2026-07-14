@@ -13,6 +13,7 @@ import { QuickPoseView } from '@quickpose/react-native';
 import { useBodyMapping } from '../pose/useBodyMapping';
 import { audioEngine } from '../audio/AudioEngine';
 import { useAudioMapping, MappingPresetName } from '../mapping/useAudioMapping';
+import { AudioParameters } from '../mapping/types';
 import { FullBodyState } from '../stores/useAppStore';
 import { getQuickPoseSdkKey, isQuickPoseKeyConfigured } from '../config/env';
 import {
@@ -65,6 +66,9 @@ export default function ConductorScreen() {
   const resultKeysRef = useRef(0);
   const pendingResultsRef = useRef<Record<string, number> | null>(null);
   const processScheduledRef = useRef(false);
+  const lastBodyStateRef = useRef<FullBodyState | null>(null);
+  const lastAudioParamsRef = useRef<AudioParameters>({});
+  const [audioDebug, setAudioDebug] = useState('');
 
   useEffect(() => {
     isSoundEnabledRef.current = isSoundEnabled;
@@ -174,8 +178,16 @@ export default function ConductorScreen() {
       setBodyDetected(true);
     }
 
+    lastBodyStateRef.current = bodyState;
+
     if (isSoundEnabledRef.current) {
-      applyToAudioRef.current(bodyState);
+      const params = applyToAudioRef.current(bodyState);
+      lastAudioParamsRef.current = params;
+      if (__DEV__) {
+        const f1 = params.osc1Frequency?.toFixed(0) ?? '—';
+        const cut = params.filterCutoff?.toFixed(0) ?? '—';
+        setAudioDebug(`audio f1:${f1}Hz cut:${cut}`);
+      }
     }
 
     if (__DEV__) {
@@ -231,6 +243,10 @@ export default function ConductorScreen() {
         await new Promise((r) => setTimeout(r, 120));
         await audioEngine.start();
         setIsSoundEnabled(true);
+        if (lastBodyStateRef.current) {
+          const params = applyToAudioRef.current(lastBodyStateRef.current);
+          lastAudioParamsRef.current = params;
+        }
       } finally {
         setIsAudioStarting(false);
       }
@@ -361,6 +377,9 @@ export default function ConductorScreen() {
         {poseDiag.length > 0 && <Text style={styles.debugTiny}>{poseDiag}</Text>}
         {resultKeysLabel.length > 0 && (
           <Text style={styles.debugTiny}>{resultKeysLabel}</Text>
+        )}
+        {isSoundEnabled && audioDebug.length > 0 && (
+          <Text style={styles.debugTiny}>{audioDebug}</Text>
         )}
         {resultKeyCount === 0 && !poseDiag && (
           <Text style={styles.debugTiny}>brak eventów z QuickPose (sprawdź Metro)</Text>

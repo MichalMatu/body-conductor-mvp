@@ -54,8 +54,8 @@ export class AudioEngine {
   private lastParams: AudioParameters = {};
 
   // For smoothing
-  private readonly smoothingTime = 0.07; // slightly faster response on device
-  private readonly paramEpsilon = 0.02;
+  private readonly smoothingTime = 0.045;
+  private readonly paramEpsilon = 0.008;
 
   async init(): Promise<void> {
     if (this.isInitialized) return;

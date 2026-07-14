@@ -20,7 +20,7 @@ function smoothFeatures(
   const keysToSmooth: (keyof BodyFeatures)[] = [
     'leftHandHeightRel', 'rightHandHeightRel',
     'leftHandSide', 'rightHandSide',
-    'handsDistance', 'bodyOpenness', 'torsoCenterY',
+    'handsDistance', 'handsVerticalDiff', 'bodyOpenness', 'torsoCenterY',
     'leftElbowAngle', 'rightElbowAngle',
   ];
 
@@ -114,6 +114,18 @@ export const useBodyMapping = () => {
       if (derived.rightHandHeightRel !== undefined) {
         features.rightHandHeightRel = derived.rightHandHeightRel;
       }
+      if (derived.leftHandSide !== undefined) {
+        features.leftHandSide = derived.leftHandSide;
+      }
+      if (derived.rightHandSide !== undefined) {
+        features.rightHandSide = derived.rightHandSide;
+      }
+      if (derived.handsDistance !== undefined) {
+        features.handsDistance = derived.handsDistance;
+      }
+      if (derived.handsVerticalDiff !== undefined) {
+        features.handsVerticalDiff = derived.handsVerticalDiff;
+      }
       if (derived.bodyOpenness !== undefined) {
         features.bodyOpenness = derived.bodyOpenness;
       }
@@ -121,7 +133,15 @@ export const useBodyMapping = () => {
       features = smoothFeatures(smoothedRef.current, features);
       smoothedRef.current = features;
 
-      const velocities = computeVelocity(features);
+      let velocities = computeVelocity(features);
+      if (derived.romActivity !== undefined && derived.romActivity > velocities.overallMovement) {
+        velocities = {
+          ...velocities,
+          overallMovement: Math.max(velocities.overallMovement, derived.romActivity),
+          leftHandSpeed: Math.max(velocities.leftHandSpeed, derived.romActivity * 0.9),
+          rightHandSpeed: Math.max(velocities.rightHandSpeed, derived.romActivity * 0.9),
+        };
+      }
       const state: FullBodyState = { ...features, ...velocities };
       lastStateRef.current = state;
       return {

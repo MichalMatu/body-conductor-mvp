@@ -63,19 +63,52 @@ function isBodyDetected(results: QuickPoseResults): { detected: boolean; score: 
   return { detected: overlayOk || romOk || anySignal, score };
 }
 
+/** Arm height proxy from shoulder elevation + elbow extension (ROM changes most when waving). */
+function armHeightFromRom(shoulder?: number, elbow?: number): number | undefined {
+  const parts: number[] = [];
+
+  if (typeof shoulder === 'number') {
+    parts.push(normalizeRom(shoulder, -30, 155) * 2 - 1);
+  }
+  if (typeof elbow === 'number') {
+    const extension = 180 - Math.abs(elbow);
+    parts.push(normalizeRom(extension, 10, 145) * 2 - 1);
+  }
+
+  if (parts.length === 0) return undefined;
+  return clamp(parts.reduce((sum, v) => sum + v, 0) / parts.length, -1, 1);
+}
+
+/** Horizontal reach proxy from asymmetric shoulder/elbow angles. */
+function armSideFromRom(shoulder?: number, elbow?: number, side: 'left' | 'right' = 'left'): number {
+  const shoulderPart =
+    typeof shoulder === 'number' ? normalizeRom(shoulder, -20, 120) * 2 - 1 : 0;
+  const elbowPart =
+    typeof elbow === 'number' ? normalizeRom(elbow, 25, 165) * 2 - 1 : 0;
+  const bias = side === 'left' ? -0.12 : 0.12;
+  return clamp(shoulderPart * 0.55 + elbowPart * 0.45 + bias, -1, 1);
+}
+
 export interface QuickPoseDerivedSignals {
   leftElbowAngle?: number;
   rightElbowAngle?: number;
   leftHandHeightRel?: number;
   rightHandHeightRel?: number;
+  leftHandSide?: number;
+  rightHandSide?: number;
+  handsDistance?: number;
+  handsVerticalDiff?: number;
   bodyOpenness?: number;
+  romActivity?: number;
   detected: boolean;
   detectionScore: number;
 }
 
+let prevRomSnapshot: Record<string, number> | null = null;
+
 /**
- * Maps QuickPose feature values (overlay confidence + ROM) into body features
- * for the mapping engine.
+ * Maps QuickPose ROM + overlay into expressive body features for audio mapping.
+ * Elbow/shoulder ROM drive height, spread, and movement — overlay alone is too static.
  */
 export function deriveSignalsFromQuickPose(
   results: QuickPoseResults
@@ -83,50 +116,91 @@ export function deriveSignalsFromQuickPose(
   const { detected, score } = isBodyDetected(results);
 
   if (!detected) {
+    prevRomSnapshot = null;
     return { detected: false, detectionScore: score };
   }
 
-  const out: QuickPoseDerivedSignals = { detected: true, detectionScore: score };
   const overlay = results[OVERLAY_WHOLE_BODY];
-
   const leftElbow = results[ROM_ELBOW_LEFT];
-  if (typeof leftElbow === 'number') {
-    out.leftElbowAngle = clamp(leftElbow, 20, 175);
-  }
-
   const rightElbow = results[ROM_ELBOW_RIGHT];
-  if (typeof rightElbow === 'number') {
-    out.rightElbowAngle = clamp(rightElbow, 20, 175);
-  }
-
   const leftShoulder = results[ROM_SHOULDER_LEFT];
-  if (typeof leftShoulder === 'number') {
-    out.leftHandHeightRel = normalizeRom(leftShoulder, -40, 140) * 2 - 1;
+  const rightShoulder = results[ROM_SHOULDER_RIGHT];
+
+  const out: QuickPoseDerivedSignals = { detected: true, detectionScore: score };
+
+  if (typeof leftElbow === 'number') {
+    out.leftElbowAngle = clamp(Math.abs(leftElbow), 20, 175);
+  }
+  if (typeof rightElbow === 'number') {
+    out.rightElbowAngle = clamp(Math.abs(rightElbow), 20, 175);
   }
 
-  const rightShoulder = results[ROM_SHOULDER_RIGHT];
-  if (typeof rightShoulder === 'number') {
-    out.rightHandHeightRel = normalizeRom(rightShoulder, -40, 140) * 2 - 1;
+  out.leftHandHeightRel = armHeightFromRom(leftShoulder, leftElbow);
+  out.rightHandHeightRel = armHeightFromRom(rightShoulder, rightElbow);
+
+  if (out.leftHandHeightRel === undefined && typeof overlay === 'number') {
+    out.leftHandHeightRel = normalizeRom(overlay, 0, 1) * 2 - 1;
   }
+  if (out.rightHandHeightRel === undefined && typeof overlay === 'number') {
+    out.rightHandHeightRel = normalizeRom(overlay, 0, 1) * 2 - 1;
+  }
+
+  out.leftHandSide = armSideFromRom(leftShoulder, leftElbow, 'left');
+  out.rightHandSide = armSideFromRom(rightShoulder, rightElbow, 'right');
 
   if (typeof leftShoulder === 'number' && typeof rightShoulder === 'number') {
-    const spread = Math.abs(leftShoulder - rightShoulder);
-    out.bodyOpenness = clamp(0.22 + normalizeRom(spread, 8, 95) * 0.68, 0.15, 0.95);
-  } else if (typeof overlay === 'number') {
-    out.bodyOpenness = clamp(0.2 + normalizeRom(overlay, 0, 1) * 0.7, 0.15, 0.95);
-    if (out.leftHandHeightRel === undefined) {
-      out.leftHandHeightRel = normalizeRom(overlay, 0, 1) * 2 - 1;
-    }
-    if (out.rightHandHeightRel === undefined) {
-      out.rightHandHeightRel = normalizeRom(overlay, 0, 1) * 2 - 1;
-    }
-  } else if (typeof leftElbow === 'number' || typeof rightElbow === 'number') {
-    const elbowAvg =
-      ((typeof leftElbow === 'number' ? leftElbow : 90) +
-        (typeof rightElbow === 'number' ? rightElbow : 90)) /
-      2;
-    out.bodyOpenness = clamp(0.25 + normalizeRom(elbowAvg, 35, 155) * 0.55, 0.15, 0.95);
+    const shoulderSpread = Math.abs(leftShoulder - rightShoulder);
+    out.handsDistance = clamp(normalizeRom(shoulderSpread, 5, 110) * 0.65 + 0.12, 0.05, 1);
+    out.bodyOpenness = clamp(0.18 + normalizeRom(shoulderSpread, 8, 95) * 0.72, 0.15, 0.95);
   }
+
+  if (typeof leftElbow === 'number' && typeof rightElbow === 'number') {
+    const elbowSpread = Math.abs(leftElbow - rightElbow);
+    const elbowDist = clamp(normalizeRom(elbowSpread, 4, 90), 0, 1);
+    out.handsDistance = clamp((out.handsDistance ?? 0.2) * 0.45 + elbowDist * 0.55, 0.05, 1);
+    if (out.bodyOpenness === undefined) {
+      out.bodyOpenness = clamp(0.2 + elbowDist * 0.65, 0.15, 0.95);
+    }
+  }
+
+  if (out.bodyOpenness === undefined && typeof overlay === 'number') {
+    out.bodyOpenness = clamp(0.2 + normalizeRom(overlay, 0, 1) * 0.55, 0.15, 0.95);
+  }
+
+  if (
+    out.leftHandHeightRel !== undefined &&
+    out.rightHandHeightRel !== undefined
+  ) {
+    out.handsVerticalDiff = clamp(
+      (out.leftHandHeightRel - out.rightHandHeightRel) * 0.85,
+      -1,
+      1
+    );
+  }
+
+  const romNow: Record<string, number> = {};
+  for (const key of ROM_KEYS) {
+    const v = results[key];
+    if (typeof v === 'number' && !Number.isNaN(v)) {
+      romNow[key] = v;
+    }
+  }
+
+  if (prevRomSnapshot) {
+    let deltaSum = 0;
+    let count = 0;
+    for (const [key, value] of Object.entries(romNow)) {
+      const prev = prevRomSnapshot[key];
+      if (prev !== undefined) {
+        deltaSum += Math.abs(value - prev);
+        count += 1;
+      }
+    }
+    if (count > 0) {
+      out.romActivity = clamp(deltaSum / (count * 18), 0, 1);
+    }
+  }
+  prevRomSnapshot = romNow;
 
   return out;
 }
