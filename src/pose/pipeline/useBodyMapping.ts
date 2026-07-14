@@ -56,9 +56,15 @@ const initialBody: FullBodyState = {
 };
 
 export const useBodyMapping = () => {
-  const { computeVelocity } = useBodyVelocity();
+  const { computeVelocity, resetVelocity } = useBodyVelocity();
   const smoothedRef = useRef<BodyFeatures | null>(null);
   const lastStateRef = useRef<FullBodyState>(initialBody);
+
+  const resetBodyMapping = useCallback(() => {
+    smoothedRef.current = null;
+    lastStateRef.current = initialBody;
+    resetVelocity();
+  }, [resetVelocity]);
 
   const processPoseFrame = useCallback(
     (frame: MediaPipePoseFrame): {
@@ -102,5 +108,5 @@ export const useBodyMapping = () => {
     [computeVelocity]
   );
 
-  return { processPoseFrame };
+  return { processPoseFrame, resetBodyMapping };
 };

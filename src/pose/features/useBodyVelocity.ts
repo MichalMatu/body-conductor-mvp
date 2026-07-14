@@ -73,5 +73,15 @@ export function useBodyVelocity() {
     return result;
   }, []);
 
-  return { computeVelocity };
+  const resetVelocity = useCallback(() => {
+    historyRef.current = null;
+    velocitiesRef.current = {
+      leftHandSpeed: 0,
+      rightHandSpeed: 0,
+      handsSpreadSpeed: 0,
+      overallMovement: 0,
+    };
+  }, []);
+
+  return { computeVelocity, resetVelocity };
 };

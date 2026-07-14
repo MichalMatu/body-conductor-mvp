@@ -23,12 +23,6 @@ export function useAudioSession({
   }, [applyToAudio]);
 
   useEffect(() => {
-    return () => {
-      audioEngine.dispose();
-    };
-  }, []);
-
-  useEffect(() => {
     if (!sessionActive) {
       audioEngine.stop();
       setIsStarting(false);
@@ -63,9 +57,14 @@ export function useAudioSession({
 
     return () => {
       cancelled = true;
-      audioEngine.stop();
     };
   }, [sessionActive, lastBodyStateRef]);
+
+  useEffect(() => {
+    return () => {
+      audioEngine.dispose();
+    };
+  }, []);
 
   return { isStarting };
 }

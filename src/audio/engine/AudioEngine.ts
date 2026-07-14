@@ -55,7 +55,7 @@ export class AudioEngine {
 
   // For smoothing
   private readonly smoothingTime = 0.045;
-  private readonly paramEpsilon = 0.02;
+  private readonly paramEpsilon = 0.008;
 
   async init(): Promise<void> {
     if (this.isInitialized) return;
@@ -281,12 +281,11 @@ export class AudioEngine {
 
     this.isPlaying = true;
 
-    // Gentle ramp up of master to avoid clicks/pops on start (important on Android)
+    // Start silent — mapping drives volume once pose is detected.
     if (this.masterGain && this.audioContext) {
       const now = this.audioContext.currentTime;
       this.masterGain.gain.cancelScheduledValues(now);
       this.masterGain.gain.value = 0.001;
-      this.masterGain.gain.setTargetAtTime(0.32, now + 0.01, 0.06);
     }
   }
 

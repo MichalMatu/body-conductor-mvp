@@ -5,6 +5,7 @@ import type { FullBodyState, MediaPipePoseFrame } from '../../pose/types';
 import {
   DETECTION_TIMEOUT_MS,
   POSE_PROCESS_MS,
+  SILENT_MASTER_VOLUME,
   UI_SYNC_MS,
 } from '../../pose/config/sensitivity';
 import { logPoseToSerialMonitor, resetPoseSerialLog } from '../../pose/debug/poseSerialLog';
@@ -19,6 +20,10 @@ interface PoseFramePipelineOptions {
   applyToAudio: (bodyState: FullBodyState) => AudioParameters;
   sessionActive: boolean;
   lastBodyStateRef?: MutableRefObject<FullBodyState | null>;
+}
+
+function muteAudio(): void {
+  audioEngine.updateParameters({ masterVolume: SILENT_MASTER_VOLUME });
 }
 
 export function usePoseFramePipeline({
@@ -36,16 +41,17 @@ export function usePoseFramePipeline({
   const sessionActiveRef = useRef(sessionActive);
   const applyToAudioRef = useRef(applyToAudio);
   const lastProcessRef = useRef(0);
-  const lastDetectionRef = useRef(Date.now());
-  const lastVolumeFadeRef = useRef(0);
+  const lastDetectionRef = useRef(0);
   const bodyDetectedRef = useRef(false);
   const debugRef = useRef<Partial<FullBodyState>>({});
-  const detectionScoreRef = useRef(0);
   const pendingFrameRef = useRef<MediaPipePoseFrame | null>(null);
   const processScheduledRef = useRef(false);
 
   useEffect(() => {
     sessionActiveRef.current = sessionActive;
+    if (sessionActive) {
+      lastDetectionRef.current = 0;
+    }
   }, [sessionActive]);
 
   useEffect(() => {
@@ -57,11 +63,17 @@ export function usePoseFramePipeline({
 
     const id = setInterval(() => {
       const now = Date.now();
-      const detected = now - lastDetectionRef.current <= DETECTION_TIMEOUT_MS;
+      const hasRecentPose =
+        lastDetectionRef.current > 0 &&
+        now - lastDetectionRef.current <= DETECTION_TIMEOUT_MS;
+      const detected = hasRecentPose;
 
       if (detected !== bodyDetectedRef.current) {
         bodyDetectedRef.current = detected;
         setBodyDetected(detected);
+        if (!detected && sessionActiveRef.current) {
+          muteAudio();
+        }
       }
 
       setDebugValues({ ...debugRef.current });
@@ -85,7 +97,6 @@ export function usePoseFramePipeline({
 
     const { bodyState, detected, detectionScore: score, landmarkCount } =
       processPoseFrame(frame);
-    detectionScoreRef.current = score;
 
     debugRef.current = {
       leftHandHeightRel: bodyState.leftHandHeightRel,
@@ -113,13 +124,8 @@ export function usePoseFramePipeline({
     }
 
     if (!detected) {
-      if (
-        sessionActiveRef.current &&
-        now - lastDetectionRef.current > 500 &&
-        now - lastVolumeFadeRef.current > POSE_PROCESS_MS
-      ) {
-        lastVolumeFadeRef.current = now;
-        audioEngine.updateParameters({ masterVolume: 0.06 });
+      if (sessionActiveRef.current) {
+        muteAudio();
       }
       return;
     }
@@ -135,7 +141,6 @@ export function usePoseFramePipeline({
     if (sessionActiveRef.current) {
       applyToAudioRef.current(bodyState);
     }
-
   }, [processPoseFrame, lastBodyStateRef]);
 
   const scheduleProcess = useCallback(() => {
@@ -157,8 +162,10 @@ export function usePoseFramePipeline({
     setBodyDetected(false);
     debugRef.current = {};
     setDebugValues({});
-    resetPoseSerialLog();
     lastBodyStateRef.current = null;
+    lastDetectionRef.current = 0;
+    resetPoseSerialLog();
+    muteAudio();
   }, [lastBodyStateRef]);
 
   return {

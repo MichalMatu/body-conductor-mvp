@@ -18,7 +18,7 @@ export default function ConductorScreen() {
   const [sessionActive, setSessionActive] = useState(false);
   const lastBodyStateRef = useRef<FullBodyState | null>(null);
 
-  const { processPoseFrame } = useBodyMapping();
+  const { processPoseFrame, resetBodyMapping } = useBodyMapping();
   const { applyToAudio } = useAudioMapping();
 
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -44,8 +44,9 @@ export default function ConductorScreen() {
 
   const endSession = useCallback(() => {
     setSessionActive(false);
+    resetBodyMapping();
     posePipeline.resetDetection();
-  }, [posePipeline]);
+  }, [posePipeline, resetBodyMapping]);
 
   useImmersiveSession();
 
