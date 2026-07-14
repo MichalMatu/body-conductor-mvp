@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   PermissionsAndroid,
   Platform,
+  InteractionManager,
 } from 'react-native';
 import { QuickPoseView } from '@quickpose/react-native';
 import { useBodyMapping } from '../pose/useBodyMapping';
@@ -16,11 +17,13 @@ import { FullBodyState } from '../stores/useAppStore';
 import { getQuickPoseSdkKey, isQuickPoseKeyConfigured } from '../config/env';
 import {
   DEBUG_UPDATE_MS,
-  DETECTION_UI_MS,
+  DETECTION_POLL_MS,
   DETECTION_TIMEOUT_MS,
+  DETECTION_UI_MS,
+  POSE_PROCESS_MS,
 } from '../pose/sensitivity';
 
-const QUICKPOSE_FEATURES = ['overlay.wholeBody', 'showPoints'];
+const QUICKPOSE_FEATURES = ['overlay.wholeBody'] as const;
 
 const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
   { label: 'Default', preset: 'default' },
@@ -30,19 +33,25 @@ const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
 
 export default function ConductorScreen() {
   const [isSoundEnabled, setIsSoundEnabled] = useState(false);
+  const [isAudioStarting, setIsAudioStarting] = useState(false);
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
   const [bodyDetected, setBodyDetected] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  const sdkKey = getQuickPoseSdkKey();
+
+  const sdkKey = useMemo(() => getQuickPoseSdkKey(), []);
+  const quickPoseFeatures = useMemo(() => [...QUICKPOSE_FEATURES], []);
 
   const { processQuickPoseResults } = useBodyMapping();
   const { currentConfig, switchToPreset, applyToAudio } = useAudioMapping();
 
   const isSoundEnabledRef = useRef(isSoundEnabled);
   const applyToAudioRef = useRef(applyToAudio);
+  const lastProcessRef = useRef(0);
   const lastDebugUpdateRef = useRef(0);
   const lastDetectionRef = useRef(Date.now());
   const detectionUiRef = useRef(0);
+  const bodyDetectedRef = useRef(false);
+  const lastVolumeFadeRef = useRef(0);
 
   useEffect(() => {
     isSoundEnabledRef.current = isSoundEnabled;
@@ -74,62 +83,91 @@ export default function ConductorScreen() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      if (Date.now() - lastDetectionRef.current > DETECTION_TIMEOUT_MS) {
+      const lost = Date.now() - lastDetectionRef.current > DETECTION_TIMEOUT_MS;
+      if (lost && bodyDetectedRef.current) {
+        bodyDetectedRef.current = false;
         setBodyDetected(false);
       }
-    }, 280);
+    }, DETECTION_POLL_MS);
     return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
-    audioEngine.init();
     return () => {
       audioEngine.dispose();
     };
   }, []);
 
-  const handleUpdate = (event: { nativeEvent?: { results?: Record<string, number> } }) => {
-    const now = Date.now();
-    const results = event.nativeEvent?.results ?? {};
-    const { bodyState, detected } = processQuickPoseResults(results);
+  const handleUpdate = useCallback(
+    (event: { nativeEvent?: { results?: Record<string, number> } }) => {
+      const now = Date.now();
+      if (now - lastProcessRef.current < POSE_PROCESS_MS) {
+        return;
+      }
+      lastProcessRef.current = now;
 
-    if (!detected) {
-      if (isSoundEnabledRef.current && now - lastDetectionRef.current > 420) {
-        audioEngine.updateParameters({ masterVolume: 0.06 });
+      const results = event.nativeEvent?.results ?? {};
+      const { bodyState, detected } = processQuickPoseResults(results);
+
+      if (!detected) {
+        if (
+          isSoundEnabledRef.current &&
+          now - lastDetectionRef.current > 420 &&
+          now - lastVolumeFadeRef.current > POSE_PROCESS_MS
+        ) {
+          lastVolumeFadeRef.current = now;
+          audioEngine.updateParameters({ masterVolume: 0.06 });
+        }
+        return;
+      }
+
+      lastDetectionRef.current = now;
+
+      if (isSoundEnabledRef.current) {
+        applyToAudioRef.current(bodyState);
+      }
+
+      if (__DEV__ && now - lastDebugUpdateRef.current > DEBUG_UPDATE_MS) {
+        lastDebugUpdateRef.current = now;
+        setDebugValues({
+          leftHandHeightRel: bodyState.leftHandHeightRel,
+          rightHandHeightRel: bodyState.rightHandHeightRel,
+          bodyOpenness: bodyState.bodyOpenness,
+          overallMovement: bodyState.overallMovement,
+          leftElbowAngle: bodyState.leftElbowAngle,
+        });
+      }
+
+      if (now - detectionUiRef.current > DETECTION_UI_MS) {
+        detectionUiRef.current = now;
+        if (!bodyDetectedRef.current) {
+          bodyDetectedRef.current = true;
+          setBodyDetected(true);
+        }
+      }
+    },
+    [processQuickPoseResults]
+  );
+
+  const toggleSound = async () => {
+    if (isAudioStarting) return;
+
+    if (!isSoundEnabled) {
+      setIsAudioStarting(true);
+      await new Promise<void>((resolve) => {
+        InteractionManager.runAfterInteractions(() => resolve());
+      });
+      try {
+        await audioEngine.start();
+        setIsSoundEnabled(true);
+      } finally {
+        setIsAudioStarting(false);
       }
       return;
     }
 
-    lastDetectionRef.current = now;
-
-    if (isSoundEnabledRef.current) {
-      applyToAudioRef.current(bodyState);
-    }
-
-    if (now - lastDebugUpdateRef.current > DEBUG_UPDATE_MS) {
-      lastDebugUpdateRef.current = now;
-      setDebugValues({
-        leftHandHeightRel: bodyState.leftHandHeightRel,
-        rightHandHeightRel: bodyState.rightHandHeightRel,
-        bodyOpenness: bodyState.bodyOpenness,
-        overallMovement: bodyState.overallMovement,
-        leftElbowAngle: bodyState.leftElbowAngle,
-      });
-    }
-
-    if (now - detectionUiRef.current > DETECTION_UI_MS) {
-      detectionUiRef.current = now;
-      setBodyDetected(true);
-    }
-  };
-
-  const toggleSound = async () => {
-    if (!isSoundEnabled) {
-      await audioEngine.start();
-    } else {
-      audioEngine.stop();
-    }
-    setIsSoundEnabled(!isSoundEnabled);
+    audioEngine.stop();
+    setIsSoundEnabled(false);
   };
 
   if (hasCameraPermission === false) {
@@ -160,6 +198,7 @@ export default function ConductorScreen() {
   }
 
   const dv = debugValues;
+  const showDebug = __DEV__ && dv.leftHandHeightRel !== undefined;
 
   return (
     <View style={styles.container}>
@@ -173,7 +212,7 @@ export default function ConductorScreen() {
 
       <QuickPoseView
         sdkKey={sdkKey}
-        features={QUICKPOSE_FEATURES}
+        features={quickPoseFeatures}
         useFrontCamera={true}
         onUpdate={handleUpdate}
         style={styles.camera}
@@ -214,14 +253,21 @@ export default function ConductorScreen() {
         </View>
 
         <Button
-          title={isSoundEnabled ? 'Wyłącz dźwięk' : 'Włącz dźwięk'}
+          title={
+            isAudioStarting
+              ? 'Uruchamianie dźwięku...'
+              : isSoundEnabled
+                ? 'Wyłącz dźwięk'
+                : 'Włącz dźwięk'
+          }
           onPress={toggleSound}
+          disabled={isAudioStarting}
         />
 
-        {dv.leftHandHeightRel !== undefined && (
+        {showDebug && (
           <>
             <Text style={styles.debug}>
-              L-Hand↑: {dv.leftHandHeightRel.toFixed(2)} | R-Hand↑:{' '}
+              L-Hand↑: {dv.leftHandHeightRel!.toFixed(2)} | R-Hand↑:{' '}
               {dv.rightHandHeightRel?.toFixed(2)}
             </Text>
             <Text style={styles.debugSmall}>

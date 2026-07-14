@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import type { QuickPoseResults } from '@quickpose/react-native';
 import { FullBodyState } from '../stores/useAppStore';
-import { extractBodyFeatures, BodyFeatures } from './bodyFeatures';
+import { BodyFeatures } from './bodyFeatures';
 import { deriveSignalsFromQuickPose } from './parseQuickPoseResults';
 import { FEATURE_SMOOTH } from './sensitivity';
 import { useBodyVelocity } from './useBodyVelocity';
@@ -30,6 +30,24 @@ function smoothFeatures(
 
   return out;
 }
+
+const defaultFeatures: BodyFeatures = {
+  leftWristY: 0.5,
+  rightWristY: 0.5,
+  leftWristX: 0.3,
+  rightWristX: 0.7,
+  leftHandHeightRel: 0,
+  rightHandHeightRel: 0,
+  leftHandSide: -0.5,
+  rightHandSide: 0.5,
+  handsDistance: 0.2,
+  shoulderWidth: 0.25,
+  leftElbowAngle: 90,
+  rightElbowAngle: 90,
+  handsVerticalDiff: 0,
+  bodyOpenness: 0.5,
+  torsoCenterY: 0.6,
+};
 
 const initialBody: FullBodyState = {
   leftWristY: 0.5,
@@ -78,7 +96,7 @@ export const useBodyMapping = () => {
         return { bodyState: faded, detected: false };
       }
 
-      let features = extractBodyFeatures([]);
+      let features: BodyFeatures = { ...defaultFeatures };
 
       if (derived.leftElbowAngle !== undefined) {
         features.leftElbowAngle = derived.leftElbowAngle;

@@ -51,9 +51,11 @@ export class AudioEngine {
 
   private isInitialized = false;
   private isPlaying = false;
+  private lastParams: AudioParameters = {};
 
   // For smoothing
   private readonly smoothingTime = 0.07; // slightly faster response on device
+  private readonly paramEpsilon = 0.008;
 
   async init(): Promise<void> {
     if (this.isInitialized) return;
@@ -159,6 +161,15 @@ export class AudioEngine {
    * Applies all parameters safely with smoothing where beneficial.
    * Added support for Voice 3 (sub) and safe fallbacks.
    */
+  private shouldApply(key: keyof AudioParameters, value: number): boolean {
+    const prev = this.lastParams[key];
+    if (prev === undefined || Math.abs(prev - value) >= this.paramEpsilon) {
+      this.lastParams[key] = value;
+      return true;
+    }
+    return false;
+  }
+
   updateParameters(params: AudioParameters): void {
     if (!this.audioContext || !this.isPlaying) return;
 
@@ -168,67 +179,93 @@ export class AudioEngine {
     // Master volume (can be driven by mapping or we keep a safe floor)
     if (params.masterVolume !== undefined && this.masterGain) {
       const target = Math.max(0.008, Math.min(1, params.masterVolume));
-      this.masterGain.gain.setTargetAtTime(target, now, smooth);
+      if (this.shouldApply('masterVolume', target)) {
+        this.masterGain.gain.setTargetAtTime(target, now, smooth);
+      }
     }
 
     // Voice 1 (saw)
     if (params.osc1Frequency !== undefined && this.voice1) {
       const freq = Math.max(38, Math.min(2600, params.osc1Frequency));
-      this.voice1.oscillator.frequency.setTargetAtTime(freq, now, smooth * 0.55);
+      if (this.shouldApply('osc1Frequency', freq)) {
+        this.voice1.oscillator.frequency.setTargetAtTime(freq, now, smooth * 0.55);
+      }
     }
     if (params.osc1Detune !== undefined && this.voice1) {
       const detune = Math.max(-60, Math.min(60, params.osc1Detune));
-      this.voice1.oscillator.detune.setTargetAtTime(detune, now, 0.045);
+      if (this.shouldApply('osc1Detune', detune)) {
+        this.voice1.oscillator.detune.setTargetAtTime(detune, now, 0.045);
+      }
     }
 
     // Voice 2 (mid sine)
     if (params.osc2Frequency !== undefined && this.voice2) {
       const freq = Math.max(38, Math.min(1900, params.osc2Frequency));
-      this.voice2.oscillator.frequency.setTargetAtTime(freq, now, smooth * 0.65);
+      if (this.shouldApply('osc2Frequency', freq)) {
+        this.voice2.oscillator.frequency.setTargetAtTime(freq, now, smooth * 0.65);
+      }
     }
     if (params.osc2Detune !== undefined && this.voice2) {
       const detune = Math.max(-55, Math.min(55, params.osc2Detune));
-      this.voice2.oscillator.detune.setTargetAtTime(detune, now, 0.045);
+      if (this.shouldApply('osc2Detune', detune)) {
+        this.voice2.oscillator.detune.setTargetAtTime(detune, now, 0.045);
+      }
     }
 
     // Voice 3 - sub bass (new, very important for pleasant body feel)
     if (params.osc3Frequency !== undefined && this.voice3) {
       const freq = Math.max(28, Math.min(180, params.osc3Frequency));
-      this.voice3.oscillator.frequency.setTargetAtTime(freq, now, smooth * 0.9);
+      if (this.shouldApply('osc3Frequency', freq)) {
+        this.voice3.oscillator.frequency.setTargetAtTime(freq, now, smooth * 0.9);
+      }
     }
     if (params.osc3Detune !== undefined && this.voice3) {
       const detune = Math.max(-30, Math.min(30, params.osc3Detune));
-      this.voice3.oscillator.detune.setTargetAtTime(detune, now, 0.08);
+      if (this.shouldApply('osc3Detune', detune)) {
+        this.voice3.oscillator.detune.setTargetAtTime(detune, now, 0.08);
+      }
     }
 
     // Filter
     if (params.filterCutoff !== undefined && this.filter) {
       const cutoff = Math.max(110, Math.min(11000, params.filterCutoff));
-      this.filter.frequency.setTargetAtTime(cutoff, now, smooth * 0.45);
+      if (this.shouldApply('filterCutoff', cutoff)) {
+        this.filter.frequency.setTargetAtTime(cutoff, now, smooth * 0.45);
+      }
     }
     if (params.filterResonance !== undefined && this.filter) {
       const q = Math.max(0.1, Math.min(16, params.filterResonance));
-      this.filter.Q.setTargetAtTime(q, now, 0.055);
+      if (this.shouldApply('filterResonance', q)) {
+        this.filter.Q.setTargetAtTime(q, now, 0.055);
+      }
     }
 
     // Delay
     if (params.delayTime !== undefined && this.delay) {
       const time = Math.max(0.025, Math.min(0.85, params.delayTime));
-      this.delay.delayTime.setTargetAtTime(time, now, 0.11);
+      if (this.shouldApply('delayTime', time)) {
+        this.delay.delayTime.setTargetAtTime(time, now, 0.11);
+      }
     }
     if (params.delayFeedback !== undefined && this.delayFeedback) {
       const fb = Math.max(0.04, Math.min(0.78, params.delayFeedback));
-      this.delayFeedback.gain.setTargetAtTime(fb, now, 0.09);
+      if (this.shouldApply('delayFeedback', fb)) {
+        this.delayFeedback.gain.setTargetAtTime(fb, now, 0.09);
+      }
     }
     if (params.delayMix !== undefined && this.delayMix) {
       const mix = Math.max(0, Math.min(0.6, params.delayMix));
-      this.delayMix.gain.setTargetAtTime(mix, now, 0.09);
+      if (this.shouldApply('delayMix', mix)) {
+        this.delayMix.gain.setTargetAtTime(mix, now, 0.09);
+      }
     }
 
     // Stereo pan
     if (params.pan !== undefined && this.panner) {
       const pan = Math.max(-1, Math.min(1, params.pan));
-      this.panner.pan.setTargetAtTime(pan, now, 0.035);
+      if (this.shouldApply('pan', pan)) {
+        this.panner.pan.setTargetAtTime(pan, now, 0.035);
+      }
     }
 
     // Future 3D placeholders
@@ -255,6 +292,7 @@ export class AudioEngine {
 
   stop(): void {
     this.isPlaying = false;
+    this.lastParams = {};
     // We keep oscillators running but cut master gain for instant silence
     if (this.masterGain && this.audioContext) {
       const now = this.audioContext.currentTime;
