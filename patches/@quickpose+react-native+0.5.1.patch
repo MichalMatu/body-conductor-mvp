@@ -20,6 +20,17 @@ diff --git a/node_modules/@quickpose/react-native/android/build/.transforms/6e4f
 new file mode 100644
 index 0000000..990592a
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/.transforms/6e4f8c48ebb9ad32be7d838cc87e3d12/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/@quickpose/react-native/android/build/.transforms/79f8e90d3ed7ab17321b8365328c53a4/results.bin b/node_modules/@quickpose/react-native/android/build/.transforms/79f8e90d3ed7ab17321b8365328c53a4/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/@quickpose/react-native/android/build/.transforms/79f8e90d3ed7ab17321b8365328c53a4/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/@quickpose/react-native/android/build/.transforms/79f8e90d3ed7ab17321b8365328c53a4/transformed/classes/classes_dex/classes.dex b/node_modules/@quickpose/react-native/android/build/.transforms/79f8e90d3ed7ab17321b8365328c53a4/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..9396c65
+Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/.transforms/79f8e90d3ed7ab17321b8365328c53a4/transformed/classes/classes_dex/classes.dex differ
 diff --git a/node_modules/@quickpose/react-native/android/build/.transforms/aa18e043c32bb3720df529ca2679cfbe/results.bin b/node_modules/@quickpose/react-native/android/build/.transforms/aa18e043c32bb3720df529ca2679cfbe/results.bin
 new file mode 100644
 index 0000000..0d259dd
@@ -160,7 +171,7 @@ index 0000000..b4f6fb2
 \ No newline at end of file
 diff --git a/node_modules/@quickpose/react-native/android/build/intermediates/aar_main_jar/debug/syncDebugLibJars/classes.jar b/node_modules/@quickpose/react-native/android/build/intermediates/aar_main_jar/debug/syncDebugLibJars/classes.jar
 new file mode 100644
-index 0000000..bb500ad
+index 0000000..f04fc10
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/intermediates/aar_main_jar/debug/syncDebugLibJars/classes.jar differ
 diff --git a/node_modules/@quickpose/react-native/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/@quickpose/react-native/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
 new file mode 100644
@@ -187,7 +198,7 @@ new file mode 100644
 index 0000000..e69de29
 diff --git a/node_modules/@quickpose/react-native/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/@quickpose/react-native/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
 new file mode 100644
-index 0000000..b192039
+index 0000000..1f4fff2
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
 diff --git a/node_modules/@quickpose/react-native/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/@quickpose/react-native/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
 new file mode 100644
@@ -377,7 +388,7 @@ index 0000000..4cf96a9
 +</paths>
 diff --git a/node_modules/@quickpose/react-native/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/@quickpose/react-native/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
 new file mode 100644
-index 0000000..ce7629a
+index 0000000..0a3b9db
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
 diff --git a/node_modules/@quickpose/react-native/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/@quickpose/react-native/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
 new file mode 100644
@@ -389,7 +400,7 @@ index 0000000..ee70eed
 +xml quickpose_file_paths
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab
 new file mode 100644
-index 0000000..1d6f0c8
+index 0000000..e91e883
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream
 new file mode 100644
@@ -405,7 +416,7 @@ index 0000000..a9f80ae
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at
 new file mode 100644
-index 0000000..c793eda
+index 0000000..cd89d54
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i
 new file mode 100644
@@ -417,7 +428,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab
 new file mode 100644
-index 0000000..b91118d
+index 0000000..b2c05d2
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream
 new file mode 100644
@@ -433,7 +444,7 @@ index 0000000..93a595b
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at
 new file mode 100644
-index 0000000..ecd6c70
+index 0000000..791d079
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i
 new file mode 100644
@@ -445,7 +456,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab
 new file mode 100644
-index 0000000..c5d4f54
+index 0000000..8e41920
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream
 new file mode 100644
@@ -461,7 +472,7 @@ index 0000000..93a595b
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at
 new file mode 100644
-index 0000000..f71c893
+index 0000000..3e2fb51
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i
 new file mode 100644
@@ -473,7 +484,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab
 new file mode 100644
-index 0000000..a052f54
+index 0000000..742c54b
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream
 new file mode 100644
@@ -489,7 +500,7 @@ index 0000000..a541356
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at
 new file mode 100644
-index 0000000..bf7e3c1
+index 0000000..41045c3
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i
 new file mode 100644
@@ -501,7 +512,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab
 new file mode 100644
-index 0000000..b69d9d3
+index 0000000..dfc5347
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream
 new file mode 100644
@@ -517,7 +528,7 @@ index 0000000..ec8f944
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at
 new file mode 100644
-index 0000000..6a44f28
+index 0000000..6cf1baf
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i
 new file mode 100644
@@ -529,7 +540,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab
 new file mode 100644
-index 0000000..3760e85
+index 0000000..2fd4f57
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream
 new file mode 100644
@@ -545,7 +556,7 @@ index 0000000..a9f80ae
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at
 new file mode 100644
-index 0000000..57d3455
+index 0000000..e2ce7e0
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i
 new file mode 100644
@@ -557,7 +568,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab
 new file mode 100644
-index 0000000..115a181
+index 0000000..da03246
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream
 new file mode 100644
@@ -573,7 +584,7 @@ index 0000000..a9f80ae
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at
 new file mode 100644
-index 0000000..683b4b3
+index 0000000..60c702c
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i
 new file mode 100644
@@ -585,7 +596,7 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab
 new file mode 100644
-index 0000000..bad05f3
+index 0000000..60c7b2b
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream
 new file mode 100644
@@ -601,7 +612,7 @@ index 0000000..a9f80ae
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at
 new file mode 100644
-index 0000000..a55873b
+index 0000000..9711b26
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i
 new file mode 100644
@@ -613,16 +624,16 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab
 new file mode 100644
-index 0000000..9202d67
+index 0000000..0737472
 --- /dev/null
 +++ b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab
 @@ -0,0 +1,2 @@
-+9
++10
 +0
 \ No newline at end of file
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab
 new file mode 100644
-index 0000000..38653c9
+index 0000000..b7fe657
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream
 new file mode 100644
@@ -638,7 +649,7 @@ index 0000000..a9f80ae
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at
 new file mode 100644
-index 0000000..a30ec1a
+index 0000000..263bcd3
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i
 new file mode 100644
@@ -650,27 +661,27 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab
 new file mode 100644
-index 0000000..b5c2091
+index 0000000..aaa0203
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream
 new file mode 100644
-index 0000000..afd1b6e
+index 0000000..8ad02ff
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len
 new file mode 100644
-index 0000000..9a6f654
+index 0000000..c15663d
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len
 new file mode 100644
-index 0000000..eb0b8a0
+index 0000000..fd5292d
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at
 new file mode 100644
-index 0000000..aab7ef1
+index 0000000..1817d5b
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i
 new file mode 100644
-index 0000000..cdf4c62
+index 0000000..5f2acb4
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len
 new file mode 100644
@@ -678,39 +689,39 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab
 new file mode 100644
-index 0000000..53b8cf0
+index 0000000..267a57d
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream
 new file mode 100644
-index 0000000..c630d52
+index 0000000..508bd36
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len
 new file mode 100644
-index 0000000..eadc61c
+index 0000000..77543fe
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len
 new file mode 100644
-index 0000000..89aebb4
+index 0000000..e2d9339
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values
 new file mode 100644
-index 0000000..c0e5bef
+index 0000000..910f989
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at
 new file mode 100644
-index 0000000..1065900
+index 0000000..d1c388a
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s
 new file mode 100644
-index 0000000..65ed3e1
+index 0000000..09aaf47
 --- /dev/null
 +++ b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.s
 @@ -0,0 +1 @@
-+˙Eıxıj…j÷TÂëﬂ%
++˙Eıxıj…j÷TÂëﬂ%€‘Ë
 \ No newline at end of file
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i
 new file mode 100644
-index 0000000..9d3cdb1
+index 0000000..9d126e3
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len
 new file mode 100644
@@ -718,19 +729,19 @@ index 0000000..131e265
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin
 new file mode 100644
-index 0000000..da66c54
+index 0000000..3379fe4
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin
 new file mode 100644
-index 0000000..3151629
+index 0000000..28199e1
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin differ
 diff --git a/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/local-state/build-history.bin b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/local-state/build-history.bin
 new file mode 100644
-index 0000000..51a31b5
+index 0000000..7c290d6
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/kotlin/compileDebugKotlin/local-state/build-history.bin differ
 diff --git a/node_modules/@quickpose/react-native/android/build/outputs/aar/quickpose_react-native-debug.aar b/node_modules/@quickpose/react-native/android/build/outputs/aar/quickpose_react-native-debug.aar
 new file mode 100644
-index 0000000..7631573
+index 0000000..93e0559
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/outputs/aar/quickpose_react-native-debug.aar differ
 diff --git a/node_modules/@quickpose/react-native/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/@quickpose/react-native/android/build/outputs/logs/manifest-merger-debug-report.txt
 new file mode 100644
@@ -810,30 +821,101 @@ index 0000000..a80ec33
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPosePackage.class differ
 diff --git a/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$Companion.class b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$Companion.class
 new file mode 100644
-index 0000000..38410cc
+index 0000000..a09e1b5
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$Companion.class differ
 diff --git a/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$emitLoop$1.class b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$emitLoop$1.class
 new file mode 100644
-index 0000000..4d40ea3
+index 0000000..c95a394
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$emitLoop$1.class differ
 diff --git a/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$startCamera$1$1.class b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$startCamera$1$1.class
 new file mode 100644
-index 0000000..b9fda0e
+index 0000000..bbbd744
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$startCamera$1$1.class differ
 diff --git a/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$startCamera$1.class b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$startCamera$1.class
 new file mode 100644
-index 0000000..1034c49
+index 0000000..50c6e49
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$startCamera$1.class differ
 diff --git a/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$tryStart$1.class b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$tryStart$1.class
 new file mode 100644
-index 0000000..69f67cf
+index 0000000..e41a84f
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager$tryStart$1.class differ
 diff --git a/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager.class b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager.class
 new file mode 100644
-index 0000000..352a351
+index 0000000..6604ce8
 Binary files /dev/null and b/node_modules/@quickpose/react-native/android/build/tmp/kotlin-classes/debug/ai/quickpose/reactnative/QuickPoseViewManager.class differ
+diff --git a/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseEmitterModule.kt b/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseEmitterModule.kt
+new file mode 100644
+index 0000000..502890c
+--- /dev/null
++++ b/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseEmitterModule.kt
+@@ -0,0 +1,48 @@
++package ai.quickpose.reactnative
++
++import com.facebook.react.bridge.Arguments
++import com.facebook.react.bridge.ReactApplicationContext
++import com.facebook.react.bridge.ReactContextBaseJavaModule
++import com.facebook.react.modules.core.DeviceEventManagerModule
++
++class QuickPoseEmitterModule(private val reactContext: ReactApplicationContext) :
++    ReactContextBaseJavaModule(reactContext) {
++
++    companion object {
++        const val NAME = "QuickPoseEmitter"
++        const val EVENT_NAME = "QuickPoseUpdate"
++
++        @Volatile
++        private var instance: QuickPoseEmitterModule? = null
++
++        fun emitUpdate(resultsJson: String, fps: Int) {
++            instance?.sendUpdate(resultsJson, fps)
++        }
++    }
++
++    init {
++        instance = this
++    }
++
++    override fun getName(): String = NAME
++
++    override fun invalidate() {
++        if (instance === this) {
++            instance = null
++        }
++        super.invalidate()
++    }
++
++    private fun sendUpdate(resultsJson: String, fps: Int) {
++        if (!reactContext.hasActiveReactInstance()) return
++
++        val params = Arguments.createMap().apply {
++            putString("resultsJson", resultsJson)
++            putInt("fps", fps)
++        }
++
++        reactContext
++            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
++            .emit(EVENT_NAME, params)
++    }
++}
+\ No newline at end of file
+diff --git a/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPosePackage.kt b/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPosePackage.kt
+index 3bb8acd..baafb5a 100644
+--- a/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPosePackage.kt
++++ b/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPosePackage.kt
+@@ -7,7 +7,10 @@ import com.facebook.react.uimanager.ViewManager
+ 
+ class QuickPosePackage : ReactPackage {
+     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+-        return listOf(QuickPoseCaptureModule(reactContext))
++        return listOf(
++            QuickPoseCaptureModule(reactContext),
++            QuickPoseEmitterModule(reactContext),
++        )
+     }
+ 
+     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
 diff --git a/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseViewManager.kt b/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseViewManager.kt
-index 05f72d1..f8b9a54 100644
+index 05f72d1..c902982 100644
 --- a/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseViewManager.kt
 +++ b/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseViewManager.kt
 @@ -6,9 +6,14 @@ import android.Manifest
@@ -852,7 +934,19 @@ index 05f72d1..f8b9a54 100644
  import androidx.core.app.ActivityCompat
  import androidx.core.content.ContextCompat
  import androidx.lifecycle.lifecycleScope
-@@ -27,6 +32,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -18,8 +23,10 @@ import com.facebook.react.bridge.ReadableMap
+ import com.facebook.react.common.MapBuilder
+ import com.facebook.react.uimanager.SimpleViewManager
+ import com.facebook.react.uimanager.ThemedReactContext
++import com.facebook.react.uimanager.UIManagerHelper
+ import com.facebook.react.uimanager.annotations.ReactProp
+-import com.facebook.react.uimanager.events.RCTEventEmitter
++import com.facebook.react.internal.interop.InteropEvent
++import com.facebook.react.uimanager.events.EventDispatcher
+ import kotlinx.coroutines.launch
+ 
+ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -27,6 +34,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
      companion object {
          private const val REACT_CLASS = "QuickPoseView"
          private const val CAMERA_PERMISSION_REQUEST_CODE = 1001
@@ -860,7 +954,7 @@ index 05f72d1..f8b9a54 100644
      }
  
      private var quickPose: QuickPose? = null
-@@ -36,7 +42,18 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -36,7 +44,18 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
      private var featureMaps: List<ReadableMap> = emptyList()
      private var useFrontCamera: Boolean = true
      private var hasStarted = false
@@ -879,7 +973,7 @@ index 05f72d1..f8b9a54 100644
  
      override fun getName(): String = REACT_CLASS
  
-@@ -60,10 +77,27 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -60,10 +79,27 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
  
      @ReactProp(name = "sdkKey")
      fun setSdkKey(view: FrameLayout, key: String?) {
@@ -908,7 +1002,7 @@ index 05f72d1..f8b9a54 100644
      @ReactProp(name = "features")
      fun setFeatures(view: FrameLayout, features: ReadableArray?) {
          featureMaps = if (features != null) (0 until features.size()).mapNotNull { features.getMap(it) } else emptyList()
-@@ -71,6 +105,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -71,6 +107,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
              val keyed = mapFeatures()
              if (keyed.isNotEmpty()) {
                  currentFeatures = keyed
@@ -916,7 +1010,7 @@ index 05f72d1..f8b9a54 100644
                  quickPose?.update(keyed.map { it.second }.toTypedArray())
              }
          } else {
-@@ -89,17 +124,22 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -89,17 +126,22 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
  
          val reactContext = view.context as? ThemedReactContext ?: return
  
@@ -949,7 +1043,7 @@ index 05f72d1..f8b9a54 100644
  
          hasStarted = true
  
-@@ -110,25 +150,97 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -110,25 +152,118 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
      }
  
      override fun onDropViewInstance(view: FrameLayout) {
@@ -974,9 +1068,12 @@ index 05f72d1..f8b9a54 100644
 -                    Choreographer.getInstance().postFrameCallback(this)
 +    private val emitLoop = object : Runnable {
 +        override fun run() {
-+            val ctx = emitContext ?: return
++            val ctx = emitContext
 +            val id = emitViewId
-+            if (id < 0) return
++            if (ctx == null || id < 0) {
++                emitHandler.postDelayed(this, eventEmitIntervalMs)
++                return
++            }
 +
 +            val data = pendingSnapshot
 +            val frameFps = pendingFps
@@ -991,23 +1088,41 @@ index 05f72d1..f8b9a54 100644
 +                    }
 +                    val jsonStr = resultsJson.toString()
 +                    emitHandler.post {
-+                        try {
-+                            val event = Arguments.createMap().apply {
-+                                putString("resultsJson", jsonStr)
-+                                putString("feedbacksJson", "{}")
-+                                putInt("fps", frameFps)
-+                            }
-+                            ctx.getJSModule(RCTEventEmitter::class.java)
-+                                .receiveEvent(id, "topUpdate", event)
-+                        } catch (e: Exception) {
-+                            Log.w(TAG, "receiveEvent failed: ${e.message}")
-+                        }
++                        dispatchUpdate(ctx, id, jsonStr, frameFps)
 +                    }
 +                } catch (e: Exception) {
 +                    Log.w(TAG, "emit json failed: ${e.message}")
                  }
              }
 +            emitHandler.postDelayed(this, eventEmitIntervalMs)
++        }
++    }
++
++    private fun dispatchUpdate(
++        reactContext: ThemedReactContext,
++        viewId: Int,
++        resultsJson: String,
++        fps: Int
++    ) {
++        QuickPoseEmitterModule.emitUpdate(resultsJson, fps)
++
++        try {
++            val dispatcher: EventDispatcher? =
++                UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
++            if (dispatcher == null) {
++                Log.w(TAG, "dispatchUpdate: no EventDispatcher for tag=$viewId")
++                return
++            }
++
++            val event = Arguments.createMap().apply {
++                putString("resultsJson", resultsJson)
++                putString("feedbacksJson", "{}")
++                putInt("fps", fps)
++            }
++            val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
++            dispatcher.dispatchEvent(InteropEvent("topUpdate", event, surfaceId, viewId))
++        } catch (e: Exception) {
++            Log.w(TAG, "dispatchUpdate failed: ${e.message}")
 +        }
 +    }
 +
@@ -1045,17 +1160,17 @@ index 05f72d1..f8b9a54 100644
 +            lastWidth = width
 +            lastHeight = height
 +            manuallyLayoutChildren(view)
-         }
--        Choreographer.getInstance().postFrameCallback(frameCallback)
++        }
 +
 +        view.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
 +            layoutIfNeeded()
-+        }
+         }
+-        Choreographer.getInstance().postFrameCallback(frameCallback)
 +        view.post { layoutIfNeeded() }
      }
  
      private fun manuallyLayoutChildren(view: FrameLayout) {
-@@ -155,14 +267,33 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -155,14 +290,33 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
      }
  
      private fun startCamera(reactContext: ThemedReactContext, container: FrameLayout) {
@@ -1073,16 +1188,16 @@ index 05f72d1..f8b9a54 100644
          ) {
 +            Log.w(TAG, "startCamera: camera permission missing")
 +            hasStarted = false
-             return
-         }
- 
++            return
++        }
++
 +        val keyed = mapFeatures()
 +        if (keyed.isEmpty()) {
 +            Log.w(TAG, "startCamera: no features mapped from ${featureMaps.size} maps")
 +            hasStarted = false
-+            return
-+        }
-+
+             return
+         }
+ 
 +        cameraStarted = true
 +        currentFeatures = keyed
 +        startedFeatures = keyed
@@ -1090,7 +1205,7 @@ index 05f72d1..f8b9a54 100644
          val qp = QuickPose(activity, sdkKey = sdkKey)
          quickPose = qp
  
-@@ -178,40 +309,62 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -178,40 +332,62 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
              )
          )
  
@@ -1180,10 +1295,22 @@ index 05f72d1..f8b9a54 100644
      }
  
 diff --git a/node_modules/@quickpose/react-native/src/index.tsx b/node_modules/@quickpose/react-native/src/index.tsx
-index cca7ac9..42df1d3 100644
+index cca7ac9..ed549e2 100644
 --- a/node_modules/@quickpose/react-native/src/index.tsx
 +++ b/node_modules/@quickpose/react-native/src/index.tsx
-@@ -9,19 +9,23 @@ const {QuickPoseCaptureModule} = NativeModules;
+@@ -1,27 +1,51 @@
+ import React from 'react';
+-import {NativeModules, findNodeHandle} from 'react-native';
++import {NativeEventEmitter, NativeModules, findNodeHandle} from 'react-native';
+ import type {QuickPoseViewProps, QuickPoseViewRef} from './types';
+ import NativeQuickPoseView from './QuickPoseViewNativeComponent';
+ import {parseFeatureString} from './parseFeature';
+ 
+-const {QuickPoseCaptureModule} = NativeModules;
++const {QuickPoseCaptureModule, QuickPoseEmitter} = NativeModules;
++const quickPoseEventEmitter =
++  QuickPoseEmitter != null ? new NativeEventEmitter(QuickPoseEmitter) : null;
+ 
  export const QuickPoseView = React.forwardRef<QuickPoseViewRef, QuickPoseViewProps>(
    ({sdkKey, features, featureStyles, useFrontCamera = true, style, onUpdate}, ref) => {
      const nativeRef = React.useRef<React.ElementRef<typeof NativeQuickPoseView>>(null);
@@ -1195,8 +1322,7 @@ index cca7ac9..42df1d3 100644
 +      onUpdateRef.current = onUpdate;
 +    }, [onUpdate]);
 +
-+    const handleUpdate = React.useCallback((event: any) => {
-+      const {resultsJson, fps} = event.nativeEvent;
++    const deliverUpdate = React.useCallback((resultsJson: string | undefined, fps: unknown) => {
        const results = resultsJson ? JSON.parse(resultsJson) : {};
 -      const feedbacks = feedbacksJson ? JSON.parse(feedbacksJson) : {};
 -      onUpdate?.({
@@ -1210,6 +1336,25 @@ index cca7ac9..42df1d3 100644
        });
 -    };
 +    }, []);
++
++    React.useEffect(() => {
++      if (!quickPoseEventEmitter) return;
++      const subscription = quickPoseEventEmitter.addListener(
++        'QuickPoseUpdate',
++        (payload: {resultsJson?: string; fps?: number}) => {
++          deliverUpdate(payload?.resultsJson, payload?.fps);
++        },
++      );
++      return () => subscription.remove();
++    }, [deliverUpdate]);
++
++    const handleUpdate = React.useCallback(
++      (event: any) => {
++        const {resultsJson, fps} = event.nativeEvent;
++        deliverUpdate(resultsJson, fps);
++      },
++      [deliverUpdate],
++    );
  
      const parsedFeatures = React.useMemo(() => {
        return features

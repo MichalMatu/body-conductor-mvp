@@ -42,6 +42,7 @@ export default function ConductorScreen() {
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
   const [detectionScore, setDetectionScore] = useState(0);
   const [resultKeyCount, setResultKeyCount] = useState(0);
+  const [rawEventCount, setRawEventCount] = useState(0);
   const [resultKeysLabel, setResultKeysLabel] = useState('');
   const [poseDiag, setPoseDiag] = useState('');
   const [bodyDetected, setBodyDetected] = useState(false);
@@ -137,13 +138,15 @@ export default function ConductorScreen() {
     lastProcessRef.current = now;
 
     const results = pendingResultsRef.current ?? {};
-    resultKeysRef.current = Object.keys(results).length;
+    const allKeys = Object.keys(results);
+    resultKeysRef.current = allKeys.length;
     const { bodyState, detected, detectionScore: score } = processQuickPoseResults(results);
     detectionScoreRef.current = score;
 
     const keys = Object.keys(results).filter((k) => !k.startsWith('_'));
     setDetectionScore(score);
     setResultKeyCount(keys.length);
+    setRawEventCount(allKeys.length);
     setResultKeysLabel(keys.join(', '));
 
     const diag: string[] = [];
@@ -352,8 +355,8 @@ export default function ConductorScreen() {
         </View>
 
         <Text style={styles.debugSmall}>
-          sygnał: {detectionScore.toFixed(2)} | dane: {resultKeyCount} | klucz:{' '}
-          {sdkKey.length > 0 ? 'OK' : 'BRAK'}
+          sygnał: {detectionScore.toFixed(2)} | dane: {resultKeyCount} | eventy:{' '}
+          {rawEventCount} | klucz: {sdkKey.length > 0 ? 'OK' : 'BRAK'}
         </Text>
         {poseDiag.length > 0 && <Text style={styles.debugTiny}>{poseDiag}</Text>}
         {resultKeysLabel.length > 0 && (
