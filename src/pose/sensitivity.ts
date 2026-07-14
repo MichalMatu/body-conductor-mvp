@@ -10,11 +10,11 @@ export const MAX_SPEED = 2.0;
 /** Min QuickPose result value treated as "body visible". */
 export const DETECTION_THRESHOLD = 0.12;
 
-/** Min interval between pose/audio processing (~8 fps). */
-export const POSE_PROCESS_MS = 125;
+/** Min interval between pose/audio processing (~4 fps). */
+export const POSE_PROCESS_MS = 250;
 
 /** How often the status row is synced from refs to React state (ms). */
-export const UI_SYNC_MS = 900;
+export const UI_SYNC_MS = 1500;
 
 /** Throttle debug UI updates (ms). */
 export const DEBUG_UPDATE_MS = 1200;

@@ -21,12 +21,9 @@ import {
   UI_SYNC_MS,
 } from '../pose/sensitivity';
 
-/** ROM-only — no skeleton overlay (much lighter on Android UI thread). */
 const QUICKPOSE_FEATURES = [
   'rangeOfMotion.shoulder.left',
   'rangeOfMotion.shoulder.right',
-  'rangeOfMotion.elbow.left',
-  'rangeOfMotion.elbow.right',
 ] as const;
 
 const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
@@ -36,6 +33,7 @@ const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
 ];
 
 export default function ConductorScreen() {
+  const [sessionActive, setSessionActive] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(false);
   const [isAudioStarting, setIsAudioStarting] = useState(false);
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
@@ -55,6 +53,8 @@ export default function ConductorScreen() {
   const lastVolumeFadeRef = useRef(0);
   const bodyDetectedRef = useRef(false);
   const debugRef = useRef<Partial<FullBodyState>>({});
+  const pendingResultsRef = useRef<Record<string, number> | null>(null);
+  const processScheduledRef = useRef(false);
 
   useEffect(() => {
     isSoundEnabledRef.current = isSoundEnabled;
@@ -85,6 +85,7 @@ export default function ConductorScreen() {
   }, []);
 
   useEffect(() => {
+    if (!sessionActive) return;
     const id = setInterval(() => {
       const now = Date.now();
       const detected = now - lastDetectionRef.current <= DETECTION_TIMEOUT_MS;
@@ -102,7 +103,7 @@ export default function ConductorScreen() {
       }
     }, UI_SYNC_MS);
     return () => clearInterval(id);
-  }, []);
+  }, [sessionActive]);
 
   useEffect(() => {
     return () => {
@@ -110,47 +111,75 @@ export default function ConductorScreen() {
     };
   }, []);
 
+  const processPendingResults = useCallback(() => {
+    processScheduledRef.current = false;
+    const now = Date.now();
+    if (now - lastProcessRef.current < POSE_PROCESS_MS) {
+      return;
+    }
+    lastProcessRef.current = now;
+
+    const results = pendingResultsRef.current ?? {};
+    const { bodyState, detected } = processQuickPoseResults(results);
+
+    if (!detected) {
+      if (
+        isSoundEnabledRef.current &&
+        now - lastDetectionRef.current > 500 &&
+        now - lastVolumeFadeRef.current > POSE_PROCESS_MS
+      ) {
+        lastVolumeFadeRef.current = now;
+        audioEngine.updateParameters({ masterVolume: 0.06 });
+      }
+      return;
+    }
+
+    lastDetectionRef.current = now;
+
+    if (isSoundEnabledRef.current) {
+      applyToAudioRef.current(bodyState);
+    }
+
+    if (__DEV__) {
+      debugRef.current = {
+        leftHandHeightRel: bodyState.leftHandHeightRel,
+        rightHandHeightRel: bodyState.rightHandHeightRel,
+        bodyOpenness: bodyState.bodyOpenness,
+        overallMovement: bodyState.overallMovement,
+        leftElbowAngle: bodyState.leftElbowAngle,
+      };
+    }
+  }, [processQuickPoseResults]);
+
+  const scheduleProcess = useCallback(() => {
+    if (processScheduledRef.current) return;
+    processScheduledRef.current = true;
+    setTimeout(processPendingResults, 0);
+  }, [processPendingResults]);
+
   const handleUpdate = useCallback(
     (event: { nativeEvent?: { results?: Record<string, number> } }) => {
-      const now = Date.now();
-      if (now - lastProcessRef.current < POSE_PROCESS_MS) {
-        return;
-      }
-      lastProcessRef.current = now;
-
-      const results = event.nativeEvent?.results ?? {};
-      const { bodyState, detected } = processQuickPoseResults(results);
-
-      if (!detected) {
-        if (
-          isSoundEnabledRef.current &&
-          now - lastDetectionRef.current > 500 &&
-          now - lastVolumeFadeRef.current > POSE_PROCESS_MS
-        ) {
-          lastVolumeFadeRef.current = now;
-          audioEngine.updateParameters({ masterVolume: 0.06 });
-        }
-        return;
-      }
-
-      lastDetectionRef.current = now;
-
-      if (isSoundEnabledRef.current) {
-        applyToAudioRef.current(bodyState);
-      }
-
-      if (__DEV__) {
-        debugRef.current = {
-          leftHandHeightRel: bodyState.leftHandHeightRel,
-          rightHandHeightRel: bodyState.rightHandHeightRel,
-          bodyOpenness: bodyState.bodyOpenness,
-          overallMovement: bodyState.overallMovement,
-          leftElbowAngle: bodyState.leftElbowAngle,
-        };
-      }
+      pendingResultsRef.current = event.nativeEvent?.results ?? {};
+      scheduleProcess();
     },
-    [processQuickPoseResults]
+    [scheduleProcess]
   );
+
+  const startSession = () => {
+    InteractionManager.runAfterInteractions(() => {
+      setSessionActive(true);
+    });
+  };
+
+  const endSession = () => {
+    audioEngine.stop();
+    setIsSoundEnabled(false);
+    setSessionActive(false);
+    setBodyDetected(false);
+    bodyDetectedRef.current = false;
+    debugRef.current = {};
+    setDebugValues({});
+  };
 
   const toggleSound = async () => {
     if (isAudioStarting) return;
@@ -161,7 +190,7 @@ export default function ConductorScreen() {
         InteractionManager.runAfterInteractions(() => resolve());
       });
       try {
-        await new Promise((r) => setTimeout(r, 80));
+        await new Promise((r) => setTimeout(r, 120));
         await audioEngine.start();
         setIsSoundEnabled(true);
       } finally {
@@ -197,6 +226,24 @@ export default function ConductorScreen() {
     return (
       <View style={styles.container}>
         <Text style={styles.status}>Przygotowywanie kamery...</Text>
+      </View>
+    );
+  }
+
+  if (!sessionActive) {
+    return (
+      <View style={styles.startContainer}>
+        <Text style={styles.startTitle}>Body Conductor</Text>
+        <Text style={styles.startSubtitle}>
+          Kamera i śledzenie ciała uruchamiają się dopiero po starcie sesji — mniejsze
+          obciążenie telefonu.
+        </Text>
+        {!isQuickPoseKeyConfigured() && (
+          <Text style={styles.startWarning}>
+            Brak klucza QuickPose — uzupełnij .env lub sdk-key.local.ts
+          </Text>
+        )}
+        <Button title="Rozpocznij sesję" onPress={startSession} />
       </View>
     );
   }
@@ -256,17 +303,21 @@ export default function ConductorScreen() {
           ))}
         </View>
 
-        <Button
-          title={
-            isAudioStarting
-              ? 'Uruchamianie dźwięku...'
-              : isSoundEnabled
-                ? 'Wyłącz dźwięk'
-                : 'Włącz dźwięk'
-          }
-          onPress={toggleSound}
-          disabled={isAudioStarting}
-        />
+        <View style={styles.actionRow}>
+          <Button
+            title={
+              isAudioStarting
+                ? 'Uruchamianie...'
+                : isSoundEnabled
+                  ? 'Wyłącz dźwięk'
+                  : 'Włącz dźwięk'
+            }
+            onPress={toggleSound}
+            disabled={isAudioStarting}
+          />
+          <View style={styles.actionSpacer} />
+          <Button title="Zakończ sesję" onPress={endSession} color="#b45309" />
+        </View>
 
         {showDebug && (
           <>
@@ -275,15 +326,13 @@ export default function ConductorScreen() {
               {dv.rightHandHeightRel?.toFixed(2)}
             </Text>
             <Text style={styles.debugSmall}>
-              Open: {dv.bodyOpenness?.toFixed(2)} | Move: {dv.overallMovement?.toFixed(2)} | L-Elb:{' '}
-              {dv.leftElbowAngle?.toFixed(0)}°
+              Open: {dv.bodyOpenness?.toFixed(2)} | Move: {dv.overallMovement?.toFixed(2)}
             </Text>
           </>
         )}
 
         <Text style={styles.hint}>
-          Podnoś ręce → wysokość | Rozkładaj ręce → przestrzeń i delay | Ruszaj się energicznie →
-          głośniej + jaśniej
+          Podnoś ręce → wysokość | Rozkładaj ręce → przestrzeń | Ruszaj się → głośniej
         </Text>
       </View>
     </View>
@@ -295,6 +344,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  startContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 28,
+  },
+  startTitle: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  startSubtitle: {
+    color: '#888',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 28,
+  },
+  startWarning: {
+    color: '#fbbf24',
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
   camera: {
     flex: 1,
   },
@@ -303,6 +378,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: '#111',
     alignItems: 'center',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  actionSpacer: {
+    width: 12,
   },
   status: {
     color: '#fff',
