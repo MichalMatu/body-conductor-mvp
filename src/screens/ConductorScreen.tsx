@@ -139,6 +139,9 @@ export default function ConductorScreen() {
     const { bodyState, detected, detectionScore: score } = processQuickPoseResults(results);
     detectionScoreRef.current = score;
 
+    setDetectionScore(score);
+    setResultKeyCount(Object.keys(results).length);
+
     if (!detected) {
       if (
         isSoundEnabledRef.current &&
@@ -152,6 +155,10 @@ export default function ConductorScreen() {
     }
 
     lastDetectionRef.current = now;
+    if (!bodyDetectedRef.current) {
+      bodyDetectedRef.current = true;
+      setBodyDetected(true);
+    }
 
     if (isSoundEnabledRef.current) {
       applyToAudioRef.current(bodyState);
@@ -333,11 +340,10 @@ export default function ConductorScreen() {
           <Button title="Zakończ sesję" onPress={endSession} color="#b45309" />
         </View>
 
-        {__DEV__ && (
-          <Text style={styles.debugSmall}>
-            det: {detectionScore.toFixed(2)} | keys: {resultKeyCount}
-          </Text>
-        )}
+        <Text style={styles.debugSmall}>
+          sygnał: {detectionScore.toFixed(2)} | dane: {resultKeyCount}
+          {resultKeyCount === 0 ? ' (brak danych z QuickPose)' : ''}
+        </Text>
 
         {showDebug && (
           <>

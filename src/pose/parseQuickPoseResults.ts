@@ -31,17 +31,18 @@ function romValues(results: QuickPoseResults): number[] {
 
 function isBodyDetected(results: QuickPoseResults): { detected: boolean; score: number } {
   const overlay = results[OVERLAY_WHOLE_BODY];
-  if (typeof overlay === 'number') {
-    return { detected: overlay >= DETECTION_THRESHOLD, score: overlay };
-  }
-
   const rom = romValues(results);
-  if (rom.length === 0) {
-    return { detected: false, score: 0 };
-  }
+  const romMax = rom.length > 0 ? Math.max(...rom) : 0;
 
-  const score = Math.max(...rom);
-  return { detected: score >= ROM_DETECTION_THRESHOLD, score };
+  const overlayScore = typeof overlay === 'number' ? overlay : 0;
+  const score = Math.max(overlayScore, romMax);
+
+  const overlayOk =
+    typeof overlay === 'number' && overlay >= DETECTION_THRESHOLD;
+  const romOk = rom.length >= 1 && romMax >= ROM_DETECTION_THRESHOLD;
+  const romTracking = rom.length >= 2 && romMax > 0.5;
+
+  return { detected: overlayOk || romOk || romTracking, score };
 }
 
 export interface QuickPoseDerivedSignals {

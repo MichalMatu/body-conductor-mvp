@@ -8,10 +8,10 @@ export const VELOCITY_SMOOTH = 0.28;
 export const MAX_SPEED = 2.0;
 
 /** Min overlay.wholeBody confidence (0–1) for body visible. */
-export const DETECTION_THRESHOLD = 0.12;
+export const DETECTION_THRESHOLD = 0.06;
 
 /** Min ROM angle (degrees) when overlay confidence is unavailable. */
-export const ROM_DETECTION_THRESHOLD = 3;
+export const ROM_DETECTION_THRESHOLD = 1;
 
 /** Min interval between pose/audio processing (~4 fps). */
 export const POSE_PROCESS_MS = 250;
