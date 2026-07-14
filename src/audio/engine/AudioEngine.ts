@@ -55,7 +55,7 @@ export class AudioEngine {
 
   // For smoothing
   private readonly smoothingTime = 0.045;
-  private readonly paramEpsilon = 0.008;
+  private readonly paramEpsilon = 0.02;
 
   async init(): Promise<void> {
     if (this.isInitialized) return;
@@ -104,10 +104,10 @@ export class AudioEngine {
     this.delay.delayTime.value = 0.26;
 
     this.delayFeedback = this.audioContext.createGain();
-    this.delayFeedback.gain.value = 0.32;
+    this.delayFeedback.gain.value = 0.18;
 
     this.delayMix = this.audioContext.createGain();
-    this.delayMix.gain.value = 0.18;
+    this.delayMix.gain.value = 0.12;
 
     // === PANNING ===
     this.panner = this.audioContext.createStereoPanner();

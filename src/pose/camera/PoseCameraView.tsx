@@ -7,6 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { RNMediapipe } from '@thinksys/react-native-mediapipe';
+import { BRIDGE_THROTTLE_MS } from '../config/sensitivity';
 import { parseLandmarkPayload } from '../parsing/parseLandmarks';
 import type { MediaPipePoseFrame } from '../types';
 
@@ -17,6 +18,7 @@ interface PoseCameraViewProps {
 
 export function PoseCameraView({ style, onFrame }: PoseCameraViewProps) {
   const onFrameRef = useRef(onFrame);
+  const lastParseRef = useRef(0);
   const layoutLockedRef = useRef(false);
   const { width: windowWidth } = useWindowDimensions();
   const [layout, setLayout] = useState({ width: 0, height: 0 });
@@ -39,6 +41,10 @@ export function PoseCameraView({ style, onFrame }: PoseCameraViewProps) {
   }, []);
 
   const handleLandmark = useCallback((raw: unknown) => {
+    const now = Date.now();
+    if (now - lastParseRef.current < BRIDGE_THROTTLE_MS) return;
+    lastParseRef.current = now;
+
     const frame = parseLandmarkPayload(raw);
     if (frame) {
       onFrameRef.current(frame);
@@ -54,11 +60,7 @@ export function PoseCameraView({ style, onFrame }: PoseCameraViewProps) {
           width={cameraWidth}
           height={layout.height}
           onLandmark={handleLandmark}
-          face={false}
-          leftLeg={false}
-          rightLeg={false}
-          leftAnkle={false}
-          rightAnkle={false}
+          frameLimit={12}
           style={styles.camera}
         />
       )}

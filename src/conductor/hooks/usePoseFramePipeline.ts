@@ -7,6 +7,7 @@ import {
   POSE_PROCESS_MS,
   UI_SYNC_MS,
 } from '../../pose/config/sensitivity';
+import { logPoseToSerialMonitor, resetPoseSerialLog } from '../../pose/debug/poseSerialLog';
 
 interface PoseFramePipelineOptions {
   processPoseFrame: (frame: MediaPipePoseFrame) => {
@@ -27,8 +28,6 @@ export function usePoseFramePipeline({
   lastBodyStateRef: externalBodyStateRef,
 }: PoseFramePipelineOptions) {
   const [bodyDetected, setBodyDetected] = useState(false);
-  const [detectionScore, setDetectionScore] = useState(0);
-  const [landmarkCount, setLandmarkCount] = useState(0);
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
 
   const internalBodyStateRef = useRef<FullBodyState | null>(null);
@@ -84,11 +83,34 @@ export function usePoseFramePipeline({
     const frame = pendingFrameRef.current;
     if (!frame) return;
 
-    const { bodyState, detected, detectionScore: score, landmarkCount: count } =
+    const { bodyState, detected, detectionScore: score, landmarkCount } =
       processPoseFrame(frame);
     detectionScoreRef.current = score;
-    setLandmarkCount(count);
-    setDetectionScore(score);
+
+    debugRef.current = {
+      leftHandHeightRel: bodyState.leftHandHeightRel,
+      rightHandHeightRel: bodyState.rightHandHeightRel,
+      bodyOpenness: bodyState.bodyOpenness,
+      overallMovement: bodyState.overallMovement,
+      handsDistance: bodyState.handsDistance,
+      torsoCenterY: bodyState.torsoCenterY,
+    };
+
+    if (sessionActiveRef.current) {
+      logPoseToSerialMonitor(
+        {
+          detectionScore: score,
+          landmarkCount,
+          worldLandmarkCount: frame.worldLandmarks?.length ?? 0,
+          frameWidth: frame.additionalData?.width,
+          frameHeight: frame.additionalData?.height,
+          body: bodyState,
+          landmarks: frame.landmarks,
+          worldLandmarks: frame.worldLandmarks,
+        },
+        UI_SYNC_MS
+      );
+    }
 
     if (!detected) {
       if (
@@ -114,14 +136,6 @@ export function usePoseFramePipeline({
       applyToAudioRef.current(bodyState);
     }
 
-    debugRef.current = {
-      leftHandHeightRel: bodyState.leftHandHeightRel,
-      rightHandHeightRel: bodyState.rightHandHeightRel,
-      bodyOpenness: bodyState.bodyOpenness,
-      overallMovement: bodyState.overallMovement,
-      handsDistance: bodyState.handsDistance,
-      torsoCenterY: bodyState.torsoCenterY,
-    };
   }, [processPoseFrame, lastBodyStateRef]);
 
   const scheduleProcess = useCallback(() => {
@@ -143,14 +157,13 @@ export function usePoseFramePipeline({
     setBodyDetected(false);
     debugRef.current = {};
     setDebugValues({});
+    resetPoseSerialLog();
     lastBodyStateRef.current = null;
   }, [lastBodyStateRef]);
 
   return {
     handlePoseFrame,
     bodyDetected,
-    detectionScore,
-    landmarkCount,
     debugValues,
     resetDetection,
   };
