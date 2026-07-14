@@ -27,6 +27,7 @@ import {
 } from 'react-native-audio-api';
 
 import { AudioParameters } from '../../mapping/types';
+import { SILENT_MASTER_VOLUME } from '../config';
 
 interface Voice {
   oscillator: OscillatorNode;
@@ -285,7 +286,7 @@ export class AudioEngine {
     if (this.masterGain && this.audioContext) {
       const now = this.audioContext.currentTime;
       this.masterGain.gain.cancelScheduledValues(now);
-      this.masterGain.gain.value = 0.001;
+      this.masterGain.gain.value = SILENT_MASTER_VOLUME;
     }
   }
 

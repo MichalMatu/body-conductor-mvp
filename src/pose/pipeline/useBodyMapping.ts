@@ -1,9 +1,10 @@
 import { useCallback, useRef } from 'react';
+import { fadeBodyVelocities, INITIAL_BODY_STATE } from '../defaults';
 import { extractBodyFeatures } from '../features/bodyFeatures';
 import { isPoseDetected } from '../parsing/parseLandmarks';
 import { FEATURE_SMOOTH } from '../config/sensitivity';
 import type { BodyFeatures } from '../features/bodyFeatures';
-import type { FullBodyState, MediaPipePoseFrame } from '../types';
+import type { FullBodyState, MediaPipePoseFrame, PoseProcessResult } from '../types';
 import { useBodyVelocity } from '../features/useBodyVelocity';
 
 export type { BodyFeatures };
@@ -33,57 +34,24 @@ function smoothFeatures(prev: BodyFeatures | null, next: BodyFeatures): BodyFeat
   return out;
 }
 
-const initialBody: FullBodyState = {
-  leftWristY: 0.5,
-  rightWristY: 0.5,
-  leftWristX: 0.3,
-  rightWristX: 0.7,
-  leftHandHeightRel: 0,
-  rightHandHeightRel: 0,
-  leftHandSide: -0.5,
-  rightHandSide: 0.5,
-  handsDistance: 0.2,
-  shoulderWidth: 0.25,
-  leftElbowAngle: 90,
-  rightElbowAngle: 90,
-  handsVerticalDiff: 0,
-  bodyOpenness: 0.5,
-  torsoCenterY: 0.6,
-  leftHandSpeed: 0,
-  rightHandSpeed: 0,
-  handsSpreadSpeed: 0,
-  overallMovement: 0,
-};
-
 export const useBodyMapping = () => {
   const { computeVelocity, resetVelocity } = useBodyVelocity();
   const smoothedRef = useRef<BodyFeatures | null>(null);
-  const lastStateRef = useRef<FullBodyState>(initialBody);
+  const lastStateRef = useRef<FullBodyState>(INITIAL_BODY_STATE);
 
   const resetBodyMapping = useCallback(() => {
     smoothedRef.current = null;
-    lastStateRef.current = initialBody;
+    lastStateRef.current = INITIAL_BODY_STATE;
     resetVelocity();
   }, [resetVelocity]);
 
   const processPoseFrame = useCallback(
-    (frame: MediaPipePoseFrame): {
-      bodyState: FullBodyState;
-      detected: boolean;
-      detectionScore: number;
-      landmarkCount: number;
-    } => {
+    (frame: MediaPipePoseFrame): PoseProcessResult => {
       const landmarkCount = frame.landmarks.length;
       const { detected, score } = isPoseDetected(frame.landmarks);
 
       if (!detected) {
-        const faded: FullBodyState = {
-          ...lastStateRef.current,
-          overallMovement: lastStateRef.current.overallMovement * 0.85,
-          leftHandSpeed: lastStateRef.current.leftHandSpeed * 0.85,
-          rightHandSpeed: lastStateRef.current.rightHandSpeed * 0.85,
-          handsSpreadSpeed: lastStateRef.current.handsSpreadSpeed * 0.85,
-        };
+        const faded = fadeBodyVelocities(lastStateRef.current);
         lastStateRef.current = faded;
         return { bodyState: faded, detected: false, detectionScore: score, landmarkCount };
       }

@@ -84,4 +84,4 @@ export function useBodyVelocity() {
   }, []);
 
   return { computeVelocity, resetVelocity };
-};
+}

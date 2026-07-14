@@ -5,7 +5,15 @@ export type { VelocityFeatures } from './features/useBodyVelocity';
 export { PoseCameraView } from './camera/PoseCameraView';
 export { parseLandmarkPayload, isPoseDetected } from './parsing/parseLandmarks';
 export { useBodyMapping } from './pipeline/useBodyMapping';
-export type { FullBodyState, MediaPipePoseFrame, PoseLandmark } from './types';
+export { pickPoseDebugFields, POSE_DEBUG_FIELDS } from './debug/poseDebugFields';
+export { isBodyRecentlyDetected } from './detection/bodyDetection';
+export { fadeBodyVelocities, INITIAL_BODY_STATE } from './defaults';
+export type {
+  FullBodyState,
+  MediaPipePoseFrame,
+  PoseLandmark,
+  PoseProcessResult,
+} from './types';
 export {
   DETECTION_TIMEOUT_MS,
   FEATURE_SMOOTH,

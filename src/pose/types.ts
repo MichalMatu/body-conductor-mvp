@@ -22,3 +22,10 @@ export interface MediaPipePoseFrame {
   };
 }
 
+export interface PoseProcessResult {
+  bodyState: FullBodyState;
+  detected: boolean;
+  detectionScore: number;
+  landmarkCount: number;
+}
+

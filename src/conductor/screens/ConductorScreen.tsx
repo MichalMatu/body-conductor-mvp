@@ -1,13 +1,9 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, InteractionManager } from 'react-native';
+import React from 'react';
+import { View, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { PoseCameraView } from '../../pose';
-import { useBodyMapping } from '../../pose/pipeline/useBodyMapping';
-import { useAudioMapping } from '../../mapping';
-import type { FullBodyState } from '../../pose/types';
 import { useCameraPermission } from '../hooks/useCameraPermission';
-import { usePoseFramePipeline } from '../hooks/usePoseFramePipeline';
-import { useAudioSession } from '../hooks/useAudioSession';
+import { useConductorSession } from '../hooks/useConductorSession';
 import { useImmersiveSession } from '../hooks/useImmersiveSession';
 import { StartScreen } from '../components/StartScreen';
 import { CameraPermissionPrompt } from '../components/CameraPermissionPrompt';
@@ -15,38 +11,8 @@ import { SessionControls } from '../components/SessionControls';
 import { conductorStyles as styles } from '../styles';
 
 export default function ConductorScreen() {
-  const [sessionActive, setSessionActive] = useState(false);
-  const lastBodyStateRef = useRef<FullBodyState | null>(null);
-
-  const { processPoseFrame, resetBodyMapping } = useBodyMapping();
-  const { applyToAudio } = useAudioMapping();
-
   const { hasPermission, requestPermission } = useCameraPermission();
-
-  useAudioSession({
-    sessionActive,
-    applyToAudio,
-    lastBodyStateRef,
-  });
-
-  const posePipeline = usePoseFramePipeline({
-    processPoseFrame,
-    applyToAudio,
-    sessionActive,
-    lastBodyStateRef,
-  });
-
-  const startSession = useCallback(() => {
-    InteractionManager.runAfterInteractions(() => {
-      setSessionActive(true);
-    });
-  }, []);
-
-  const endSession = useCallback(() => {
-    setSessionActive(false);
-    resetBodyMapping();
-    posePipeline.resetDetection();
-  }, [posePipeline, resetBodyMapping]);
+  const session = useConductorSession();
 
   useImmersiveSession();
 
@@ -60,19 +26,19 @@ export default function ConductorScreen() {
         <Text style={styles.status}>Przygotowywanie kamery...</Text>
       </View>
     );
-  } else if (!sessionActive) {
-    content = <StartScreen onStart={startSession} />;
+  } else if (!session.sessionActive) {
+    content = <StartScreen onStart={session.startSession} />;
   } else {
     content = (
       <View style={styles.container}>
         <View style={styles.cameraArea}>
-          <PoseCameraView style={styles.camera} onFrame={posePipeline.handlePoseFrame} />
+          <PoseCameraView style={styles.camera} onFrame={session.handlePoseFrame} />
         </View>
 
         <SessionControls
-          bodyDetected={posePipeline.bodyDetected}
-          debugValues={posePipeline.debugValues}
-          onEndSession={endSession}
+          bodyDetected={session.bodyDetected}
+          debugValues={session.debugValues}
+          onEndSession={session.endSession}
         />
       </View>
     );

@@ -1,29 +1,17 @@
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
-import { audioEngine } from '../../audio';
+import { silenceGenerator } from '../../audio';
 import type { AudioParameters } from '../../mapping/types';
-import type { FullBodyState, MediaPipePoseFrame } from '../../pose/types';
-import {
-  DETECTION_TIMEOUT_MS,
-  POSE_PROCESS_MS,
-  SILENT_MASTER_VOLUME,
-  UI_SYNC_MS,
-} from '../../pose/config/sensitivity';
+import { POSE_PROCESS_MS, UI_SYNC_MS } from '../../pose/config/sensitivity';
+import { pickPoseDebugFields } from '../../pose/debug/poseDebugFields';
 import { logPoseToSerialMonitor, resetPoseSerialLog } from '../../pose/debug/poseSerialLog';
+import { isBodyRecentlyDetected } from '../../pose/detection/bodyDetection';
+import type { FullBodyState, MediaPipePoseFrame, PoseProcessResult } from '../../pose/types';
 
 interface PoseFramePipelineOptions {
-  processPoseFrame: (frame: MediaPipePoseFrame) => {
-    bodyState: FullBodyState;
-    detected: boolean;
-    detectionScore: number;
-    landmarkCount: number;
-  };
+  processPoseFrame: (frame: MediaPipePoseFrame) => PoseProcessResult;
   applyToAudio: (bodyState: FullBodyState) => AudioParameters;
   sessionActive: boolean;
   lastBodyStateRef?: MutableRefObject<FullBodyState | null>;
-}
-
-function muteAudio(): void {
-  audioEngine.updateParameters({ masterVolume: SILENT_MASTER_VOLUME });
 }
 
 export function usePoseFramePipeline({
@@ -63,16 +51,13 @@ export function usePoseFramePipeline({
 
     const id = setInterval(() => {
       const now = Date.now();
-      const hasRecentPose =
-        lastDetectionRef.current > 0 &&
-        now - lastDetectionRef.current <= DETECTION_TIMEOUT_MS;
-      const detected = hasRecentPose;
+      const detected = isBodyRecentlyDetected(lastDetectionRef.current, now);
 
       if (detected !== bodyDetectedRef.current) {
         bodyDetectedRef.current = detected;
         setBodyDetected(detected);
         if (!detected && sessionActiveRef.current) {
-          muteAudio();
+          silenceGenerator();
         }
       }
 
@@ -98,14 +83,7 @@ export function usePoseFramePipeline({
     const { bodyState, detected, detectionScore: score, landmarkCount } =
       processPoseFrame(frame);
 
-    debugRef.current = {
-      leftHandHeightRel: bodyState.leftHandHeightRel,
-      rightHandHeightRel: bodyState.rightHandHeightRel,
-      bodyOpenness: bodyState.bodyOpenness,
-      overallMovement: bodyState.overallMovement,
-      handsDistance: bodyState.handsDistance,
-      torsoCenterY: bodyState.torsoCenterY,
-    };
+    debugRef.current = pickPoseDebugFields(bodyState);
 
     if (sessionActiveRef.current) {
       logPoseToSerialMonitor(
@@ -125,7 +103,7 @@ export function usePoseFramePipeline({
 
     if (!detected) {
       if (sessionActiveRef.current) {
-        muteAudio();
+        silenceGenerator();
       }
       return;
     }
@@ -165,7 +143,7 @@ export function usePoseFramePipeline({
     lastBodyStateRef.current = null;
     lastDetectionRef.current = 0;
     resetPoseSerialLog();
-    muteAudio();
+    silenceGenerator();
   }, [lastBodyStateRef]);
 
   return {

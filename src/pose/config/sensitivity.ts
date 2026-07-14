@@ -13,9 +13,6 @@ export const LANDMARK_VISIBILITY_THRESHOLD = 0.38;
 /** Min interval between pose/audio processing (~10 fps). */
 export const POSE_PROCESS_MS = 100;
 
-/** Master gain when body is not detected (near silence). */
-export const SILENT_MASTER_VOLUME = 0.001;
-
 /** How often the status row is synced from refs to React state (ms). */
 export const UI_SYNC_MS = 1200;
 
