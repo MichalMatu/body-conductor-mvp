@@ -1,19 +1,17 @@
 diff --git a/node_modules/@thinksys/react-native-mediapipe/android/src/main/java/com/tsmediapipe/OverlayView.kt b/node_modules/@thinksys/react-native-mediapipe/android/src/main/java/com/tsmediapipe/OverlayView.kt
-index 2ecf9a4..314f131 100644
+index 2ecf9a4..6690d1c 100644
 --- a/node_modules/@thinksys/react-native-mediapipe/android/src/main/java/com/tsmediapipe/OverlayView.kt
 +++ b/node_modules/@thinksys/react-native-mediapipe/android/src/main/java/com/tsmediapipe/OverlayView.kt
-@@ -202,10 +202,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
+@@ -202,9 +202,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
        }
  
        RunningMode.LIVE_STREAM -> {
 -        // PreviewView is in FILL_START mode. So we need to scale up the
 -        // landmarks to match with the size that the captured images will be
 -        // displayed.
--        max(width * 1f / imageWidth, height * 1f / imageHeight)
-+        min(width * 1f / imageWidth, height * 1f / imageHeight)
+         max(width * 1f / imageWidth, height * 1f / imageHeight)
        }
      }
-     invalidate()
 diff --git a/node_modules/@thinksys/react-native-mediapipe/android/src/main/java/com/tsmediapipe/TsMediapipeViewManager.java b/node_modules/@thinksys/react-native-mediapipe/android/src/main/java/com/tsmediapipe/TsMediapipeViewManager.java
 index 1bac227..6e9331e 100644
 --- a/node_modules/@thinksys/react-native-mediapipe/android/src/main/java/com/tsmediapipe/TsMediapipeViewManager.java
@@ -62,7 +60,7 @@ index 1bac227..6e9331e 100644
      } catch (Exception e) {
        Log.e("TsMediapipe", "Error in manuallyLayoutChildren: " + e.getMessage());
 diff --git a/node_modules/@thinksys/react-native-mediapipe/android/src/main/res/layout/fragment_my_camera.xml b/node_modules/@thinksys/react-native-mediapipe/android/src/main/res/layout/fragment_my_camera.xml
-index 547d172..1fa184e 100644
+index 547d172..12da4de 100644
 --- a/node_modules/@thinksys/react-native-mediapipe/android/src/main/res/layout/fragment_my_camera.xml
 +++ b/node_modules/@thinksys/react-native-mediapipe/android/src/main/res/layout/fragment_my_camera.xml
 @@ -24,7 +24,7 @@
@@ -70,7 +68,7 @@ index 547d172..1fa184e 100644
      android:layout_width="match_parent"
      android:layout_height="match_parent"
 -    app:scaleType="fillStart"
-+    app:scaleType="fitCenter"
++    app:scaleType="fillCenter"
      />
  
    <com.tsmediapipe.OverlayView

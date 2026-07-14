@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { View, Text } from 'react-native';
 import type { FullBodyState } from '../../pose/types';
 import { conductorStyles as styles } from '../styles';
 
@@ -7,22 +7,52 @@ interface PoseDebugPanelProps {
   debugValues: Partial<FullBodyState>;
 }
 
+const DEBUG_FIELDS: { key: keyof FullBodyState; label: string }[] = [
+  { key: 'leftHandHeightRel', label: 'L-Hand↑' },
+  { key: 'rightHandHeightRel', label: 'R-Hand↑' },
+  { key: 'overallMovement', label: 'Ruch' },
+  { key: 'bodyOpenness', label: 'Otwarcie' },
+  { key: 'handsDistance', label: 'Rozstaw' },
+  { key: 'torsoCenterY', label: 'Tułów' },
+];
+
+const COLUMN_SPLIT = Math.ceil(DEBUG_FIELDS.length / 2);
+
+function formatValue(value: number | undefined): string {
+  return value !== undefined ? value.toFixed(2) : '—';
+}
+
+function DebugCell({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | undefined;
+}) {
+  return (
+    <View style={styles.debugCell}>
+      <Text style={styles.debugLabel}>{label}</Text>
+      <Text style={styles.debugValue}>{formatValue(value)}</Text>
+    </View>
+  );
+}
+
 export function PoseDebugPanel({ debugValues }: PoseDebugPanelProps) {
-  if (!__DEV__ || debugValues.leftHandHeightRel === undefined) {
-    return null;
-  }
+  const leftColumn = DEBUG_FIELDS.slice(0, COLUMN_SPLIT);
+  const rightColumn = DEBUG_FIELDS.slice(COLUMN_SPLIT);
 
   return (
-    <>
-      <Text style={styles.debug}>
-        L-Hand↑: {debugValues.leftHandHeightRel.toFixed(2)} | R-Hand↑:{' '}
-        {debugValues.rightHandHeightRel?.toFixed(2)}
-      </Text>
-      <Text style={styles.debugSmall}>
-        Open: {debugValues.bodyOpenness?.toFixed(2)} | Move:{' '}
-        {debugValues.overallMovement?.toFixed(2)} | Łokieć:{' '}
-        {debugValues.leftElbowAngle?.toFixed(0)}°
-      </Text>
-    </>
+    <View style={styles.debugGrid}>
+      <View style={styles.debugColumn}>
+        {leftColumn.map(({ key, label }) => (
+          <DebugCell key={key} label={label} value={debugValues[key]} />
+        ))}
+      </View>
+      <View style={styles.debugColumn}>
+        {rightColumn.map(({ key, label }) => (
+          <DebugCell key={key} label={label} value={debugValues[key]} />
+        ))}
+      </View>
+    </View>
   );
 }

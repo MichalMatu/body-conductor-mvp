@@ -10,6 +10,12 @@ module.exports = {
       supportsTablet: true,
       bundleIdentifier: "com.bodyconductor.app"
     },
+    androidStatusBar: {
+      barStyle: "light-content",
+      backgroundColor: "#000000",
+      translucent: false,
+      hidden: true,
+    },
     android: {
       package: "com.bodyconductor.app",
       permissions: [

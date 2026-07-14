@@ -30,7 +30,6 @@ export function usePoseFramePipeline({
   const [detectionScore, setDetectionScore] = useState(0);
   const [landmarkCount, setLandmarkCount] = useState(0);
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
-  const [audioDebug, setAudioDebug] = useState('');
 
   const internalBodyStateRef = useRef<FullBodyState | null>(null);
   const lastBodyStateRef = externalBodyStateRef ?? internalBodyStateRef;
@@ -48,9 +47,6 @@ export function usePoseFramePipeline({
 
   useEffect(() => {
     sessionActiveRef.current = sessionActive;
-    if (!sessionActive) {
-      setAudioDebug('');
-    }
   }, [sessionActive]);
 
   useEffect(() => {
@@ -69,13 +65,7 @@ export function usePoseFramePipeline({
         setBodyDetected(detected);
       }
 
-      if (__DEV__) {
-        const next = debugRef.current;
-        setDetectionScore(detectionScoreRef.current);
-        if (next.leftHandHeightRel !== undefined) {
-          setDebugValues({ ...next });
-        }
-      }
+      setDebugValues({ ...debugRef.current });
     }, UI_SYNC_MS);
 
     return () => clearInterval(id);
@@ -121,23 +111,17 @@ export function usePoseFramePipeline({
     lastBodyStateRef.current = bodyState;
 
     if (sessionActiveRef.current) {
-      const params = applyToAudioRef.current(bodyState);
-      if (__DEV__) {
-        const f1 = params.osc1Frequency?.toFixed(0) ?? '—';
-        const cut = params.filterCutoff?.toFixed(0) ?? '—';
-        setAudioDebug(`audio f1:${f1}Hz cut:${cut}`);
-      }
+      applyToAudioRef.current(bodyState);
     }
 
-    if (__DEV__) {
-      debugRef.current = {
-        leftHandHeightRel: bodyState.leftHandHeightRel,
-        rightHandHeightRel: bodyState.rightHandHeightRel,
-        bodyOpenness: bodyState.bodyOpenness,
-        overallMovement: bodyState.overallMovement,
-        leftElbowAngle: bodyState.leftElbowAngle,
-      };
-    }
+    debugRef.current = {
+      leftHandHeightRel: bodyState.leftHandHeightRel,
+      rightHandHeightRel: bodyState.rightHandHeightRel,
+      bodyOpenness: bodyState.bodyOpenness,
+      overallMovement: bodyState.overallMovement,
+      handsDistance: bodyState.handsDistance,
+      torsoCenterY: bodyState.torsoCenterY,
+    };
   }, [processPoseFrame, lastBodyStateRef]);
 
   const scheduleProcess = useCallback(() => {
@@ -159,7 +143,6 @@ export function usePoseFramePipeline({
     setBodyDetected(false);
     debugRef.current = {};
     setDebugValues({});
-    setAudioDebug('');
     lastBodyStateRef.current = null;
   }, [lastBodyStateRef]);
 
@@ -169,7 +152,6 @@ export function usePoseFramePipeline({
     detectionScore,
     landmarkCount,
     debugValues,
-    audioDebug,
     resetDetection,
   };
 }

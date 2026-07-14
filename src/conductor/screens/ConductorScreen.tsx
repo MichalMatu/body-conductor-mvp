@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, InteractionManager } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { PoseCameraView } from '../../pose';
 import { useBodyMapping } from '../../pose/pipeline/useBodyMapping';
 import { useAudioMapping } from '../../mapping';
@@ -7,8 +8,10 @@ import type { FullBodyState } from '../../pose/types';
 import { useCameraPermission } from '../hooks/useCameraPermission';
 import { usePoseFramePipeline } from '../hooks/usePoseFramePipeline';
 import { useAudioSession } from '../hooks/useAudioSession';
+import { useImmersiveSession } from '../hooks/useImmersiveSession';
 import { StartScreen } from '../components/StartScreen';
 import { CameraPermissionPrompt } from '../components/CameraPermissionPrompt';
+import { BodyDetectionIndicator } from '../components/BodyDetectionIndicator';
 import { SessionControls } from '../components/SessionControls';
 import { conductorStyles as styles } from '../styles';
 
@@ -21,7 +24,7 @@ export default function ConductorScreen() {
 
   const { hasPermission, requestPermission } = useCameraPermission();
 
-  const { isStarting: isAudioStarting } = useAudioSession({
+  useAudioSession({
     sessionActive,
     applyToAudio,
     lastBodyStateRef,
@@ -45,35 +48,40 @@ export default function ConductorScreen() {
     posePipeline.resetDetection();
   }, [posePipeline]);
 
-  if (hasPermission === false) {
-    return <CameraPermissionPrompt onRequestPermission={requestPermission} />;
-  }
+  useImmersiveSession();
 
-  if (hasPermission === null) {
-    return (
+  let content: React.ReactNode;
+
+  if (hasPermission === false) {
+    content = <CameraPermissionPrompt onRequestPermission={requestPermission} />;
+  } else if (hasPermission === null) {
+    content = (
       <View style={styles.container}>
         <Text style={styles.status}>Przygotowywanie kamery...</Text>
       </View>
     );
-  }
+  } else if (!sessionActive) {
+    content = <StartScreen onStart={startSession} />;
+  } else {
+    content = (
+      <View style={styles.container}>
+        <View style={styles.cameraArea}>
+          <PoseCameraView style={styles.camera} onFrame={posePipeline.handlePoseFrame} />
+          <BodyDetectionIndicator bodyDetected={posePipeline.bodyDetected} />
+        </View>
 
-  if (!sessionActive) {
-    return <StartScreen onStart={startSession} />;
+        <SessionControls
+          debugValues={posePipeline.debugValues}
+          onEndSession={endSession}
+        />
+      </View>
+    );
   }
 
   return (
-    <View style={styles.container}>
-      <PoseCameraView style={styles.camera} onFrame={posePipeline.handlePoseFrame} />
-
-      <SessionControls
-        isAudioStarting={isAudioStarting}
-        bodyDetected={posePipeline.bodyDetected}
-        landmarkCount={posePipeline.landmarkCount}
-        detectionScore={posePipeline.detectionScore}
-        audioDebug={posePipeline.audioDebug}
-        debugValues={posePipeline.debugValues}
-        onEndSession={endSession}
-      />
-    </View>
+    <>
+      <StatusBar style="light" backgroundColor="#000000" translucent={false} hidden />
+      {content}
+    </>
   );
 }
