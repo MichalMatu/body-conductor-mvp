@@ -172,7 +172,8 @@ export default function ConductorScreen() {
       {!isQuickPoseKeyConfigured && (
         <View style={styles.warningBanner}>
           <Text style={styles.warningText}>
-            ⚠️ Ustaw EXPO_PUBLIC_QUICKPOSE_SDK_KEY w pliku .env (patrz .env.example)
+            ⚠️ Brak klucza QuickPose — utwórz plik .env z EXPO_PUBLIC_QUICKPOSE_SDK_KEY (patrz
+            .env.example), potem zrestartuj Metro: npx expo start --dev-client --clear
           </Text>
         </View>
       )}

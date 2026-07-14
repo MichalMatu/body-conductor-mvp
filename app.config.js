@@ -1,3 +1,28 @@
+const fs = require('fs');
+const path = require('path');
+
+/** Read .env directly so the SDK key is available even if Metro started before loadEnvFiles. */
+function readEnvFile() {
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return {};
+
+  const vars = {};
+  for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    vars[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
+  }
+  return vars;
+}
+
+const fileEnv = readEnvFile();
+const quickposeSdkKey =
+  process.env.EXPO_PUBLIC_QUICKPOSE_SDK_KEY ||
+  fileEnv.EXPO_PUBLIC_QUICKPOSE_SDK_KEY ||
+  '';
+
 module.exports = {
   expo: {
     name: "Body Conductor",
@@ -6,6 +31,9 @@ module.exports = {
     orientation: "portrait",
     userInterfaceStyle: "dark",
     assetBundlePatterns: ["**/*"],
+    extra: {
+      quickposeSdkKey,
+    },
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.bodyconductor.app"
