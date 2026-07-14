@@ -23,10 +23,16 @@ function normalizeRom(value: number, min: number, max: number): number {
   return clamp((value - min) / (max - min), 0, 1);
 }
 
+function poseKeys(results: QuickPoseResults): string[] {
+  return Object.keys(results).filter((key) => !key.startsWith('_'));
+}
+
 function numericValues(results: QuickPoseResults): number[] {
-  return Object.values(results).filter(
-    (value): value is number => typeof value === 'number' && !Number.isNaN(value)
-  );
+  return poseKeys(results)
+    .map((key) => results[key])
+    .filter(
+      (value): value is number => typeof value === 'number' && !Number.isNaN(value)
+    );
 }
 
 function romValues(results: QuickPoseResults): number[] {
@@ -36,7 +42,7 @@ function romValues(results: QuickPoseResults): number[] {
 }
 
 function isBodyDetected(results: QuickPoseResults): { detected: boolean; score: number } {
-  const keys = Object.keys(results);
+  const keys = poseKeys(results);
   if (keys.length === 0) {
     return { detected: false, score: 0 };
   }

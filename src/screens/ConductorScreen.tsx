@@ -43,6 +43,7 @@ export default function ConductorScreen() {
   const [detectionScore, setDetectionScore] = useState(0);
   const [resultKeyCount, setResultKeyCount] = useState(0);
   const [resultKeysLabel, setResultKeysLabel] = useState('');
+  const [poseDiag, setPoseDiag] = useState('');
   const [bodyDetected, setBodyDetected] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
@@ -140,10 +141,17 @@ export default function ConductorScreen() {
     const { bodyState, detected, detectionScore: score } = processQuickPoseResults(results);
     detectionScoreRef.current = score;
 
-    const keys = Object.keys(results);
+    const keys = Object.keys(results).filter((k) => !k.startsWith('_'));
     setDetectionScore(score);
     setResultKeyCount(keys.length);
     setResultKeysLabel(keys.join(', '));
+
+    const diag: string[] = [];
+    if (results._sdkInvalid) diag.push('SDK INVALID');
+    if (results._startError) diag.push('START ERROR');
+    if (results._heartbeat) diag.push('mostek OK');
+    if (results._noPerson) diag.push('szukam osoby');
+    setPoseDiag(diag.join(' | '));
 
     if (!detected) {
       if (
@@ -344,14 +352,18 @@ export default function ConductorScreen() {
         </View>
 
         <Text style={styles.debugSmall}>
-          sygnał: {detectionScore.toFixed(2)} | dane: {resultKeyCount}
-          {resultKeyCount === 0 ? ' (brak danych z QuickPose)' : ''}
+          sygnał: {detectionScore.toFixed(2)} | dane: {resultKeyCount} | klucz:{' '}
+          {sdkKey.length > 0 ? 'OK' : 'BRAK'}
         </Text>
+        {poseDiag.length > 0 && <Text style={styles.debugTiny}>{poseDiag}</Text>}
         {resultKeysLabel.length > 0 && (
           <Text style={styles.debugTiny}>{resultKeysLabel}</Text>
         )}
+        {resultKeyCount === 0 && !poseDiag && (
+          <Text style={styles.debugTiny}>brak eventów z QuickPose (sprawdź Metro)</Text>
+        )}
         {!isQuickPoseKeyConfigured() && (
-          <Text style={styles.debugTiny}>⚠️ brak klucza SDK QuickPose</Text>
+          <Text style={styles.debugTiny}>⚠️ brak klucza SDK QuickPose w bundlu</Text>
         )}
 
         {showDebug && (
