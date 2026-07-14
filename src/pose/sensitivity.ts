@@ -10,17 +10,14 @@ export const MAX_SPEED = 2.0;
 /** Min QuickPose result value treated as "body visible". */
 export const DETECTION_THRESHOLD = 0.12;
 
-/** Min interval between pose/audio processing (~14 fps). */
-export const POSE_PROCESS_MS = 72;
+/** Min interval between pose/audio processing (~8 fps). */
+export const POSE_PROCESS_MS = 125;
+
+/** How often the status row is synced from refs to React state (ms). */
+export const UI_SYNC_MS = 900;
 
 /** Throttle debug UI updates (ms). */
-export const DEBUG_UPDATE_MS = 320;
-
-/** Throttle body-detected badge (ms). */
-export const DETECTION_UI_MS = 400;
+export const DEBUG_UPDATE_MS = 1200;
 
 /** Ms without frames before marking body as lost. */
-export const DETECTION_TIMEOUT_MS = 750;
-
-/** How often to poll for body-lost state (ms). */
-export const DETECTION_POLL_MS = 500;
+export const DETECTION_TIMEOUT_MS = 900;

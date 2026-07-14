@@ -16,14 +16,18 @@ import { useAudioMapping, MappingPresetName } from '../mapping/useAudioMapping';
 import { FullBodyState } from '../stores/useAppStore';
 import { getQuickPoseSdkKey, isQuickPoseKeyConfigured } from '../config/env';
 import {
-  DEBUG_UPDATE_MS,
-  DETECTION_POLL_MS,
   DETECTION_TIMEOUT_MS,
-  DETECTION_UI_MS,
   POSE_PROCESS_MS,
+  UI_SYNC_MS,
 } from '../pose/sensitivity';
 
-const QUICKPOSE_FEATURES = ['overlay.wholeBody'] as const;
+/** ROM-only — no skeleton overlay (much lighter on Android UI thread). */
+const QUICKPOSE_FEATURES = [
+  'rangeOfMotion.shoulder.left',
+  'rangeOfMotion.shoulder.right',
+  'rangeOfMotion.elbow.left',
+  'rangeOfMotion.elbow.right',
+] as const;
 
 const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
   { label: 'Default', preset: 'default' },
@@ -47,11 +51,10 @@ export default function ConductorScreen() {
   const isSoundEnabledRef = useRef(isSoundEnabled);
   const applyToAudioRef = useRef(applyToAudio);
   const lastProcessRef = useRef(0);
-  const lastDebugUpdateRef = useRef(0);
   const lastDetectionRef = useRef(Date.now());
-  const detectionUiRef = useRef(0);
-  const bodyDetectedRef = useRef(false);
   const lastVolumeFadeRef = useRef(0);
+  const bodyDetectedRef = useRef(false);
+  const debugRef = useRef<Partial<FullBodyState>>({});
 
   useEffect(() => {
     isSoundEnabledRef.current = isSoundEnabled;
@@ -83,12 +86,21 @@ export default function ConductorScreen() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      const lost = Date.now() - lastDetectionRef.current > DETECTION_TIMEOUT_MS;
-      if (lost && bodyDetectedRef.current) {
-        bodyDetectedRef.current = false;
-        setBodyDetected(false);
+      const now = Date.now();
+      const detected = now - lastDetectionRef.current <= DETECTION_TIMEOUT_MS;
+
+      if (detected !== bodyDetectedRef.current) {
+        bodyDetectedRef.current = detected;
+        setBodyDetected(detected);
       }
-    }, DETECTION_POLL_MS);
+
+      if (__DEV__) {
+        const next = debugRef.current;
+        if (next.leftHandHeightRel !== undefined) {
+          setDebugValues({ ...next });
+        }
+      }
+    }, UI_SYNC_MS);
     return () => clearInterval(id);
   }, []);
 
@@ -112,7 +124,7 @@ export default function ConductorScreen() {
       if (!detected) {
         if (
           isSoundEnabledRef.current &&
-          now - lastDetectionRef.current > 420 &&
+          now - lastDetectionRef.current > 500 &&
           now - lastVolumeFadeRef.current > POSE_PROCESS_MS
         ) {
           lastVolumeFadeRef.current = now;
@@ -127,23 +139,14 @@ export default function ConductorScreen() {
         applyToAudioRef.current(bodyState);
       }
 
-      if (__DEV__ && now - lastDebugUpdateRef.current > DEBUG_UPDATE_MS) {
-        lastDebugUpdateRef.current = now;
-        setDebugValues({
+      if (__DEV__) {
+        debugRef.current = {
           leftHandHeightRel: bodyState.leftHandHeightRel,
           rightHandHeightRel: bodyState.rightHandHeightRel,
           bodyOpenness: bodyState.bodyOpenness,
           overallMovement: bodyState.overallMovement,
           leftElbowAngle: bodyState.leftElbowAngle,
-        });
-      }
-
-      if (now - detectionUiRef.current > DETECTION_UI_MS) {
-        detectionUiRef.current = now;
-        if (!bodyDetectedRef.current) {
-          bodyDetectedRef.current = true;
-          setBodyDetected(true);
-        }
+        };
       }
     },
     [processQuickPoseResults]
@@ -158,6 +161,7 @@ export default function ConductorScreen() {
         InteractionManager.runAfterInteractions(() => resolve());
       });
       try {
+        await new Promise((r) => setTimeout(r, 80));
         await audioEngine.start();
         setIsSoundEnabled(true);
       } finally {

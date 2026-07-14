@@ -71,18 +71,15 @@ export function deriveSignalsFromQuickPose(
     out.rightHandHeightRel = normalizeRom(rightShoulder, -40, 140) * 2 - 1;
   }
 
-  const opennessSources = [
-    results['overlay.wholeBody'],
-    results.showPoints,
-    leftShoulder,
-    rightShoulder,
-  ].filter((v): v is number => typeof v === 'number');
-
-  if (opennessSources.length > 0) {
-    const avg =
-      opennessSources.reduce((sum, v) => sum + normalizeRom(v, 0, 1), 0) /
-      opennessSources.length;
-    out.bodyOpenness = clamp(0.2 + avg * 0.75, 0.15, 0.95);
+  if (typeof leftShoulder === 'number' && typeof rightShoulder === 'number') {
+    const spread = Math.abs(leftShoulder - rightShoulder);
+    out.bodyOpenness = clamp(0.22 + normalizeRom(spread, 8, 95) * 0.68, 0.15, 0.95);
+  } else if (typeof leftElbow === 'number' || typeof rightElbow === 'number') {
+    const elbowAvg =
+      ((typeof leftElbow === 'number' ? leftElbow : 90) +
+        (typeof rightElbow === 'number' ? rightElbow : 90)) /
+      2;
+    out.bodyOpenness = clamp(0.25 + normalizeRom(elbowAvg, 35, 155) * 0.55, 0.15, 0.95);
   }
 
   return out;
