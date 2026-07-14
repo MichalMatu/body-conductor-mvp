@@ -17,7 +17,7 @@ import { applyMapping } from './MappingEngine';
 import { MappingConfig } from './types';
 import { presets, getPreset } from './presets';
 import { AudioParameters } from './types';
-import { FullBodyState } from '../stores/useAppStore';
+import type { FullBodyState } from '../pose/types';
 
 export type MappingPresetName = keyof typeof presets;
 

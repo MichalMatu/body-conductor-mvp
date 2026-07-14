@@ -1,53 +1,37 @@
 import { useCallback, useRef } from 'react';
-import type { QuickPoseResults } from '@quickpose/react-native';
-import { FullBodyState } from '../stores/useAppStore';
-import { BodyFeatures } from './bodyFeatures';
-import { deriveSignalsFromQuickPose } from './parseQuickPoseResults';
+import { extractBodyFeatures } from './bodyFeatures';
+import { isPoseDetected } from './parseLandmarks';
 import { FEATURE_SMOOTH } from './sensitivity';
+import type { BodyFeatures } from './bodyFeatures';
+import type { FullBodyState, MediaPipePoseFrame } from './types';
 import { useBodyVelocity } from './useBodyVelocity';
 
 export type { BodyFeatures };
 
-function smoothFeatures(
-  prev: BodyFeatures | null,
-  next: BodyFeatures
-): BodyFeatures {
+function smoothFeatures(prev: BodyFeatures | null, next: BodyFeatures): BodyFeatures {
   if (!prev) return next;
 
   const s = FEATURE_SMOOTH;
   const out = { ...next };
-
   const keysToSmooth: (keyof BodyFeatures)[] = [
-    'leftHandHeightRel', 'rightHandHeightRel',
-    'leftHandSide', 'rightHandSide',
-    'handsDistance', 'handsVerticalDiff', 'bodyOpenness', 'torsoCenterY',
-    'leftElbowAngle', 'rightElbowAngle',
+    'leftHandHeightRel',
+    'rightHandHeightRel',
+    'leftHandSide',
+    'rightHandSide',
+    'handsDistance',
+    'handsVerticalDiff',
+    'bodyOpenness',
+    'torsoCenterY',
+    'leftElbowAngle',
+    'rightElbowAngle',
   ];
 
-  for (const k of keysToSmooth) {
-    out[k] = prev[k] * (1 - s) + next[k] * s;
+  for (const key of keysToSmooth) {
+    out[key] = prev[key] * (1 - s) + next[key] * s;
   }
 
   return out;
 }
-
-const defaultFeatures: BodyFeatures = {
-  leftWristY: 0.5,
-  rightWristY: 0.5,
-  leftWristX: 0.3,
-  rightWristX: 0.7,
-  leftHandHeightRel: 0,
-  rightHandHeightRel: 0,
-  leftHandSide: -0.5,
-  rightHandSide: 0.5,
-  handsDistance: 0.2,
-  shoulderWidth: 0.25,
-  leftElbowAngle: 90,
-  rightElbowAngle: 90,
-  handsVerticalDiff: 0,
-  bodyOpenness: 0.5,
-  torsoCenterY: 0.6,
-};
 
 const initialBody: FullBodyState = {
   leftWristY: 0.5,
@@ -71,24 +55,22 @@ const initialBody: FullBodyState = {
   overallMovement: 0,
 };
 
-/**
- * Processes QuickPose feature results into a stable FullBodyState for mapping.
- * Avoids Zustand updates on every frame — returns state directly to the caller.
- */
 export const useBodyMapping = () => {
   const { computeVelocity } = useBodyVelocity();
   const smoothedRef = useRef<BodyFeatures | null>(null);
   const lastStateRef = useRef<FullBodyState>(initialBody);
 
-  const processQuickPoseResults = useCallback(
-    (results: QuickPoseResults): {
+  const processPoseFrame = useCallback(
+    (frame: MediaPipePoseFrame): {
       bodyState: FullBodyState;
       detected: boolean;
       detectionScore: number;
+      landmarkCount: number;
     } => {
-      const derived = deriveSignalsFromQuickPose(results);
+      const landmarkCount = frame.landmarks.length;
+      const { detected, score } = isPoseDetected(frame.landmarks);
 
-      if (!derived.detected) {
+      if (!detected) {
         const faded: FullBodyState = {
           ...lastStateRef.current,
           overallMovement: lastStateRef.current.overallMovement * 0.85,
@@ -97,61 +79,28 @@ export const useBodyMapping = () => {
           handsSpreadSpeed: lastStateRef.current.handsSpreadSpeed * 0.85,
         };
         lastStateRef.current = faded;
-        return { bodyState: faded, detected: false, detectionScore: derived.detectionScore };
+        return { bodyState: faded, detected: false, detectionScore: score, landmarkCount };
       }
 
-      let features: BodyFeatures = { ...defaultFeatures };
-
-      if (derived.leftElbowAngle !== undefined) {
-        features.leftElbowAngle = derived.leftElbowAngle;
-      }
-      if (derived.rightElbowAngle !== undefined) {
-        features.rightElbowAngle = derived.rightElbowAngle;
-      }
-      if (derived.leftHandHeightRel !== undefined) {
-        features.leftHandHeightRel = derived.leftHandHeightRel;
-      }
-      if (derived.rightHandHeightRel !== undefined) {
-        features.rightHandHeightRel = derived.rightHandHeightRel;
-      }
-      if (derived.leftHandSide !== undefined) {
-        features.leftHandSide = derived.leftHandSide;
-      }
-      if (derived.rightHandSide !== undefined) {
-        features.rightHandSide = derived.rightHandSide;
-      }
-      if (derived.handsDistance !== undefined) {
-        features.handsDistance = derived.handsDistance;
-      }
-      if (derived.handsVerticalDiff !== undefined) {
-        features.handsVerticalDiff = derived.handsVerticalDiff;
-      }
-      if (derived.bodyOpenness !== undefined) {
-        features.bodyOpenness = derived.bodyOpenness;
-      }
-
-      features = smoothFeatures(smoothedRef.current, features);
+      const features = smoothFeatures(
+        smoothedRef.current,
+        extractBodyFeatures(frame.landmarks)
+      );
       smoothedRef.current = features;
 
-      let velocities = computeVelocity(features);
-      if (derived.romActivity !== undefined && derived.romActivity > velocities.overallMovement) {
-        velocities = {
-          ...velocities,
-          overallMovement: Math.max(velocities.overallMovement, derived.romActivity),
-          leftHandSpeed: Math.max(velocities.leftHandSpeed, derived.romActivity * 0.9),
-          rightHandSpeed: Math.max(velocities.rightHandSpeed, derived.romActivity * 0.9),
-        };
-      }
+      const velocities = computeVelocity(features);
       const state: FullBodyState = { ...features, ...velocities };
       lastStateRef.current = state;
+
       return {
         bodyState: state,
         detected: true,
-        detectionScore: derived.detectionScore,
+        detectionScore: score,
+        landmarkCount,
       };
     },
     [computeVelocity]
   );
 
-  return { processQuickPoseResults };
+  return { processPoseFrame };
 };

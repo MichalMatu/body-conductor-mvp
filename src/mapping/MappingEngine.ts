@@ -10,7 +10,7 @@
  * - Easy to debug and visualize
  */
 
-import { FullBodyState } from '../stores/useAppStore';
+import type { FullBodyState } from '../pose/types';
 import {
   MappingConfig,
   AudioParameters,

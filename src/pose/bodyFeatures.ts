@@ -9,11 +9,9 @@
  * - (0,0) is top-left, y increases downward
  */
 
-export interface Keypoint {
-  x: number;
-  y: number;
-  score?: number;
-}
+import type { PoseLandmark } from './types';
+
+export type Keypoint = PoseLandmark;
 
 export interface BodyFeatures {
   // Wrist positions (normalized 0-1)
@@ -63,12 +61,12 @@ const KP = {
   RIGHT_HIP: 24,
 };
 
-function getKp(keypoints: any[], index: number): Keypoint | null {
+function getKp(keypoints: PoseLandmark[], index: number): Keypoint | null {
   const kp = keypoints?.[index];
   if (!kp) return null;
-  const x = typeof kp.x === 'number' ? kp.x : kp.x ?? 0;
-  const y = typeof kp.y === 'number' ? kp.y : kp.y ?? 0;
-  return { x, y, score: kp.score ?? kp.visibility ?? 1 };
+  const x = typeof kp.x === 'number' ? kp.x : 0;
+  const y = typeof kp.y === 'number' ? kp.y : 0;
+  return { x, y, visibility: kp.visibility ?? kp.presence ?? 1 };
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -110,7 +108,7 @@ function calculateElbowAngle(
   return (angleRad * 180) / Math.PI;
 }
 
-export function extractBodyFeatures(keypoints: any[]): BodyFeatures {
+export function extractBodyFeatures(keypoints: PoseLandmark[]): BodyFeatures {
   const defaults: BodyFeatures = {
     leftWristY: 0.5,
     rightWristY: 0.5,

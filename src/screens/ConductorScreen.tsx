@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,26 +9,18 @@ import {
   Platform,
   InteractionManager,
 } from 'react-native';
-import { QuickPoseView } from '@quickpose/react-native';
+import { PoseCameraView } from '../pose/PoseCameraView';
 import { useBodyMapping } from '../pose/useBodyMapping';
+import type { MediaPipePoseFrame } from '../pose/types';
 import { audioEngine } from '../audio/AudioEngine';
 import { useAudioMapping, MappingPresetName } from '../mapping/useAudioMapping';
 import { AudioParameters } from '../mapping/types';
-import { FullBodyState } from '../stores/useAppStore';
-import { getQuickPoseSdkKey, isQuickPoseKeyConfigured } from '../config/env';
+import type { FullBodyState } from '../pose/types';
 import {
   DETECTION_TIMEOUT_MS,
   POSE_PROCESS_MS,
   UI_SYNC_MS,
 } from '../pose/sensitivity';
-
-const QUICKPOSE_FEATURES = [
-  'overlay.wholeBody',
-  'rangeOfMotion.shoulder.left',
-  'rangeOfMotion.shoulder.right',
-  'rangeOfMotion.elbow.left',
-  'rangeOfMotion.elbow.right',
-] as const;
 
 const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
   { label: 'Default', preset: 'default' },
@@ -42,17 +34,12 @@ export default function ConductorScreen() {
   const [isAudioStarting, setIsAudioStarting] = useState(false);
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
   const [detectionScore, setDetectionScore] = useState(0);
-  const [resultKeyCount, setResultKeyCount] = useState(0);
-  const [rawEventCount, setRawEventCount] = useState(0);
-  const [resultKeysLabel, setResultKeysLabel] = useState('');
-  const [poseDiag, setPoseDiag] = useState('');
+  const [landmarkCount, setLandmarkCount] = useState(0);
   const [bodyDetected, setBodyDetected] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [audioDebug, setAudioDebug] = useState('');
 
-  const sdkKey = useMemo(() => getQuickPoseSdkKey(), []);
-  const quickPoseFeatures = useMemo(() => [...QUICKPOSE_FEATURES], []);
-
-  const { processQuickPoseResults } = useBodyMapping();
+  const { processPoseFrame } = useBodyMapping();
   const { currentConfig, switchToPreset, applyToAudio } = useAudioMapping();
 
   const isSoundEnabledRef = useRef(isSoundEnabled);
@@ -63,12 +50,10 @@ export default function ConductorScreen() {
   const bodyDetectedRef = useRef(false);
   const debugRef = useRef<Partial<FullBodyState>>({});
   const detectionScoreRef = useRef(0);
-  const resultKeysRef = useRef(0);
-  const pendingResultsRef = useRef<Record<string, number> | null>(null);
+  const pendingFrameRef = useRef<MediaPipePoseFrame | null>(null);
   const processScheduledRef = useRef(false);
   const lastBodyStateRef = useRef<FullBodyState | null>(null);
   const lastAudioParamsRef = useRef<AudioParameters>({});
-  const [audioDebug, setAudioDebug] = useState('');
 
   useEffect(() => {
     isSoundEnabledRef.current = isSoundEnabled;
@@ -116,7 +101,6 @@ export default function ConductorScreen() {
       if (__DEV__) {
         const next = debugRef.current;
         setDetectionScore(detectionScoreRef.current);
-        setResultKeyCount(resultKeysRef.current);
         if (next.leftHandHeightRel !== undefined) {
           setDebugValues({ ...next });
         }
@@ -131,34 +115,24 @@ export default function ConductorScreen() {
     };
   }, []);
 
-  const processPendingResults = useCallback(() => {
+  const processPendingFrame = useCallback(() => {
     const now = Date.now();
     const elapsed = now - lastProcessRef.current;
     if (elapsed < POSE_PROCESS_MS) {
-      setTimeout(processPendingResults, POSE_PROCESS_MS - elapsed);
+      setTimeout(processPendingFrame, POSE_PROCESS_MS - elapsed);
       return;
     }
     processScheduledRef.current = false;
     lastProcessRef.current = now;
 
-    const results = pendingResultsRef.current ?? {};
-    const allKeys = Object.keys(results);
-    resultKeysRef.current = allKeys.length;
-    const { bodyState, detected, detectionScore: score } = processQuickPoseResults(results);
+    const frame = pendingFrameRef.current;
+    if (!frame) return;
+
+    const { bodyState, detected, detectionScore: score, landmarkCount: count } =
+      processPoseFrame(frame);
     detectionScoreRef.current = score;
-
-    const keys = Object.keys(results).filter((k) => !k.startsWith('_'));
+    setLandmarkCount(count);
     setDetectionScore(score);
-    setResultKeyCount(keys.length);
-    setRawEventCount(allKeys.length);
-    setResultKeysLabel(keys.join(', '));
-
-    const diag: string[] = [];
-    if (results._sdkInvalid) diag.push('SDK INVALID');
-    if (results._startError) diag.push('START ERROR');
-    if (results._heartbeat) diag.push('mostek OK');
-    if (results._noPerson) diag.push('szukam osoby');
-    setPoseDiag(diag.join(' | '));
 
     if (!detected) {
       if (
@@ -199,17 +173,17 @@ export default function ConductorScreen() {
         leftElbowAngle: bodyState.leftElbowAngle,
       };
     }
-  }, [processQuickPoseResults]);
+  }, [processPoseFrame]);
 
   const scheduleProcess = useCallback(() => {
     if (processScheduledRef.current) return;
     processScheduledRef.current = true;
-    setTimeout(processPendingResults, 0);
-  }, [processPendingResults]);
+    setTimeout(processPendingFrame, 0);
+  }, [processPendingFrame]);
 
-  const handleUpdate = useCallback(
-    (event: { nativeEvent?: { results?: Record<string, number> } }) => {
-      pendingResultsRef.current = event.nativeEvent?.results ?? {};
+  const handlePoseFrame = useCallback(
+    (frame: MediaPipePoseFrame) => {
+      pendingFrameRef.current = frame;
       scheduleProcess();
     },
     [scheduleProcess]
@@ -229,6 +203,7 @@ export default function ConductorScreen() {
     bodyDetectedRef.current = false;
     debugRef.current = {};
     setDebugValues({});
+    setAudioDebug('');
   };
 
   const toggleSound = async () => {
@@ -255,6 +230,7 @@ export default function ConductorScreen() {
 
     audioEngine.stop();
     setIsSoundEnabled(false);
+    setAudioDebug('');
   };
 
   if (hasCameraPermission === false) {
@@ -288,12 +264,7 @@ export default function ConductorScreen() {
     return (
       <View style={styles.startContainer}>
         <Text style={styles.startTitle}>Body Conductor</Text>
-        <Text style={styles.startSubtitle}>Uruchamianie kamery...</Text>
-        {!isQuickPoseKeyConfigured() && (
-          <Text style={styles.startWarning}>
-            Brak klucza QuickPose — uzupełnij .env lub sdk-key.local.ts
-          </Text>
-        )}
+        <Text style={styles.startSubtitle}>MediaPipe — ruch ciała steruje dźwiękiem</Text>
         <Button title="Rozpocznij teraz" onPress={startSession} />
       </View>
     );
@@ -304,21 +275,7 @@ export default function ConductorScreen() {
 
   return (
     <View style={styles.container}>
-      {!isQuickPoseKeyConfigured() && (
-        <View style={styles.warningBanner}>
-          <Text style={styles.warningText}>
-            ⚠️ Brak klucza — uzupełnij src/config/sdk-key.local.ts lub .env, potem Reload
-          </Text>
-        </View>
-      )}
-
-      <QuickPoseView
-        sdkKey={sdkKey}
-        features={quickPoseFeatures}
-        useFrontCamera={true}
-        onUpdate={handleUpdate}
-        style={styles.camera}
-      />
+      <PoseCameraView style={styles.camera} onFrame={handlePoseFrame} />
 
       <View style={styles.controls}>
         <Text style={styles.status}>
@@ -371,21 +328,10 @@ export default function ConductorScreen() {
         </View>
 
         <Text style={styles.debugSmall}>
-          sygnał: {detectionScore.toFixed(2)} | dane: {resultKeyCount} | eventy:{' '}
-          {rawEventCount} | klucz: {sdkKey.length > 0 ? 'OK' : 'BRAK'}
+          punkty: {landmarkCount} | sygnał: {detectionScore.toFixed(2)} | MediaPipe
         </Text>
-        {poseDiag.length > 0 && <Text style={styles.debugTiny}>{poseDiag}</Text>}
-        {resultKeysLabel.length > 0 && (
-          <Text style={styles.debugTiny}>{resultKeysLabel}</Text>
-        )}
         {isSoundEnabled && audioDebug.length > 0 && (
           <Text style={styles.debugTiny}>{audioDebug}</Text>
-        )}
-        {resultKeyCount === 0 && !poseDiag && (
-          <Text style={styles.debugTiny}>brak eventów z QuickPose (sprawdź Metro)</Text>
-        )}
-        {!isQuickPoseKeyConfigured() && (
-          <Text style={styles.debugTiny}>⚠️ brak klucza SDK QuickPose w bundlu</Text>
         )}
 
         {showDebug && (
@@ -395,13 +341,14 @@ export default function ConductorScreen() {
               {dv.rightHandHeightRel?.toFixed(2)}
             </Text>
             <Text style={styles.debugSmall}>
-              Open: {dv.bodyOpenness?.toFixed(2)} | Move: {dv.overallMovement?.toFixed(2)}
+              Open: {dv.bodyOpenness?.toFixed(2)} | Move: {dv.overallMovement?.toFixed(2)} | Łokieć:{' '}
+              {dv.leftElbowAngle?.toFixed(0)}°
             </Text>
           </>
         )}
 
         <Text style={styles.hint}>
-          Podnoś ręce → wysokość | Rozkładaj ręce → przestrzeń | Ruszaj się → głośniej
+          Podnoś ręce → wysokość tonu | Rozkładaj ręce → filtr | Ruszaj się → głośniej
         </Text>
       </View>
     </View>
@@ -432,12 +379,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 28,
-  },
-  startWarning: {
-    color: '#fbbf24',
-    fontSize: 12,
-    textAlign: 'center',
-    marginBottom: 16,
   },
   camera: {
     flex: 1,
@@ -535,20 +476,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
-  },
-  warningBanner: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#b45309',
-    padding: 8,
-    zIndex: 10,
-  },
-  warningText: {
-    color: '#fff',
-    fontSize: 12,
-    textAlign: 'center',
-    fontWeight: '600',
   },
 });
