@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { BodyFeatures } from './bodyFeatures';
-import { VELOCITY_SMOOTH, MAX_SPEED } from './sensitivity';
+import { VELOCITY_SMOOTH, MAX_SPEED } from '../config/sensitivity';
 
 export interface VelocityFeatures {
   leftHandSpeed: number;

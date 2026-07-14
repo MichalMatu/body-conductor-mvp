@@ -1,5 +1,5 @@
-import type { MediaPipePoseFrame, PoseLandmark } from './types';
-import { LANDMARK_VISIBILITY_THRESHOLD } from './sensitivity';
+import type { MediaPipePoseFrame, PoseLandmark } from '../types';
+import { LANDMARK_VISIBILITY_THRESHOLD } from '../config/sensitivity';
 
 const CORE_INDICES = [11, 12, 13, 14, 15, 16] as const;
 

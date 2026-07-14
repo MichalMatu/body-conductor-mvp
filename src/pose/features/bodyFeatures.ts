@@ -9,7 +9,7 @@
  * - (0,0) is top-left, y increases downward
  */
 
-import type { PoseLandmark } from './types';
+import type { PoseLandmark } from '../types';
 
 export type Keypoint = PoseLandmark;
 

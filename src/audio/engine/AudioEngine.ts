@@ -26,7 +26,7 @@ import {
   DelayNode,
 } from 'react-native-audio-api';
 
-import { AudioParameters } from '../mapping/types';
+import { AudioParameters } from '../../mapping/types';
 
 interface Voice {
   oscillator: OscillatorNode;

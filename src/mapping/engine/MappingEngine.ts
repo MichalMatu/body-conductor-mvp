@@ -10,13 +10,13 @@
  * - Easy to debug and visualize
  */
 
-import type { FullBodyState } from '../pose/types';
+import type { FullBodyState } from '../../pose/types';
 import {
   MappingConfig,
   AudioParameters,
   AudioParameter,
   MappingSourceName,
-} from './types';
+} from '../types';
 
 function applyCurve(value: number, curve: number): number {
   if (curve === 1 || curve === undefined) return value;

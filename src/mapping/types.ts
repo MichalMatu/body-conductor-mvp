@@ -9,8 +9,8 @@
  * - Composable: multiple rules can affect the same parameter (with blending)
  */
 
-import { BodyFeatures } from '../pose/bodyFeatures';
-import { VelocityFeatures } from '../pose/useBodyVelocity';
+import { BodyFeatures } from '../pose/features/bodyFeatures';
+import { VelocityFeatures } from '../pose/features/useBodyVelocity';
 
 /** All available body features that can be used as input */
 export type BodyFeatureName = keyof BodyFeatures;

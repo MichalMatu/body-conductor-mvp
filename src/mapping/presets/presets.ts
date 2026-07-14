@@ -1,4 +1,4 @@
-import { MappingConfig } from './types';
+import { MappingConfig } from '../types';
 
 /** Proste mapowanie: pozycja rąk, rozstaw, kąty łokci, prędkość ruchu → dźwięk */
 export const presets: Record<string, MappingConfig> = {

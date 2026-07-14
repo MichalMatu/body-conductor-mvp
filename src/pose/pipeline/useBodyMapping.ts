@@ -1,10 +1,10 @@
 import { useCallback, useRef } from 'react';
-import { extractBodyFeatures } from './bodyFeatures';
-import { isPoseDetected } from './parseLandmarks';
-import { FEATURE_SMOOTH } from './sensitivity';
-import type { BodyFeatures } from './bodyFeatures';
-import type { FullBodyState, MediaPipePoseFrame } from './types';
-import { useBodyVelocity } from './useBodyVelocity';
+import { extractBodyFeatures } from '../features/bodyFeatures';
+import { isPoseDetected } from '../parsing/parseLandmarks';
+import { FEATURE_SMOOTH } from '../config/sensitivity';
+import type { BodyFeatures } from '../features/bodyFeatures';
+import type { FullBodyState, MediaPipePoseFrame } from '../types';
+import { useBodyVelocity } from '../features/useBodyVelocity';
 
 export type { BodyFeatures };
 

@@ -1,23 +1,9 @@
-/**
- * useAudioMapping.ts
- * 
- * React hook that manages mapping configuration and provides a direct
- * function to push body features into the AudioEngine.
- * 
- * This version uses direct calls (no store subscription in effect) for
- * better performance on real devices.
- * 
- * Usage:
- *   const { applyToAudio, currentConfig, switchToPreset } = useAudioMapping();
- */
-
 import { useCallback, useRef, useState } from 'react';
-import { audioEngine } from '../audio/AudioEngine';
-import { applyMapping } from './MappingEngine';
-import { MappingConfig } from './types';
-import { presets, getPreset } from './presets';
-import { AudioParameters } from './types';
-import type { FullBodyState } from '../pose/types';
+import { audioEngine } from '../../audio';
+import { applyMapping } from '../engine/MappingEngine';
+import { MappingConfig, AudioParameters } from '../types';
+import { presets, getPreset } from '../presets/presets';
+import type { FullBodyState } from '../../pose/types';
 
 export type MappingPresetName = keyof typeof presets;
 
@@ -25,11 +11,6 @@ export function useAudioMapping() {
   const [config, setConfig] = useState<MappingConfig>(presets.default);
   const lastParamsRef = useRef<AudioParameters>({});
 
-  /**
-   * Directly apply current body state through the mapping and push to audio.
-   * Call this as often as you receive new pose data (from handleResults).
-   * No React re-renders triggered from inside.
-   */
   const applyToAudio = useCallback(
     (bodyState: FullBodyState) => {
       const params = applyMapping(bodyState, config);

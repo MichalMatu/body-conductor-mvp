@@ -7,8 +7,8 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { RNMediapipe } from '@thinksys/react-native-mediapipe';
-import { parseLandmarkPayload } from './parseLandmarks';
-import type { MediaPipePoseFrame } from './types';
+import { parseLandmarkPayload } from '../parsing/parseLandmarks';
+import type { MediaPipePoseFrame } from '../types';
 
 interface PoseCameraViewProps {
   style?: ViewStyle;

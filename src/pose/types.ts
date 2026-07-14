@@ -1,5 +1,5 @@
-import type { BodyFeatures } from './bodyFeatures';
-import type { VelocityFeatures } from './useBodyVelocity';
+import type { BodyFeatures } from './features/bodyFeatures';
+import type { VelocityFeatures } from './features/useBodyVelocity';
 
 export type { BodyFeatures, VelocityFeatures };
 
