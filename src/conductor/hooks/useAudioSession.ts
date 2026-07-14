@@ -1,17 +1,21 @@
-import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
+import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import { InteractionManager } from 'react-native';
 import { audioEngine } from '../../audio';
 import type { AudioParameters } from '../../mapping/types';
 import type { FullBodyState } from '../../pose/types';
 
 interface AudioSessionOptions {
+  sessionActive: boolean;
   applyToAudio: (bodyState: FullBodyState) => AudioParameters;
   lastBodyStateRef: MutableRefObject<FullBodyState | null>;
 }
 
-export function useAudioSession({ applyToAudio, lastBodyStateRef }: AudioSessionOptions) {
-  const [isSoundEnabled, setIsSoundEnabled] = useState(false);
-  const [isAudioStarting, setIsAudioStarting] = useState(false);
+export function useAudioSession({
+  sessionActive,
+  applyToAudio,
+  lastBodyStateRef,
+}: AudioSessionOptions) {
+  const [isStarting, setIsStarting] = useState(false);
   const applyToAudioRef = useRef(applyToAudio);
 
   useEffect(() => {
@@ -24,39 +28,44 @@ export function useAudioSession({ applyToAudio, lastBodyStateRef }: AudioSession
     };
   }, []);
 
-  const stopSound = useCallback(() => {
-    audioEngine.stop();
-    setIsSoundEnabled(false);
-  }, []);
-
-  const toggleSound = useCallback(async () => {
-    if (isAudioStarting) return;
-
-    if (!isSoundEnabled) {
-      setIsAudioStarting(true);
-      await new Promise<void>((resolve) => {
-        InteractionManager.runAfterInteractions(() => resolve());
-      });
-      try {
-        await new Promise((r) => setTimeout(r, 120));
-        await audioEngine.start();
-        setIsSoundEnabled(true);
-        if (lastBodyStateRef.current) {
-          applyToAudioRef.current(lastBodyStateRef.current);
-        }
-      } finally {
-        setIsAudioStarting(false);
-      }
+  useEffect(() => {
+    if (!sessionActive) {
+      audioEngine.stop();
+      setIsStarting(false);
       return;
     }
 
-    stopSound();
-  }, [isAudioStarting, isSoundEnabled, lastBodyStateRef, stopSound]);
+    let cancelled = false;
 
-  return {
-    isSoundEnabled,
-    isAudioStarting,
-    toggleSound,
-    stopSound,
-  };
+    (async () => {
+      setIsStarting(true);
+      await new Promise<void>((resolve) => {
+        InteractionManager.runAfterInteractions(() => resolve());
+      });
+      await new Promise((r) => setTimeout(r, 120));
+
+      if (cancelled) return;
+
+      await audioEngine.start();
+
+      if (cancelled) return;
+
+      if (lastBodyStateRef.current) {
+        applyToAudioRef.current(lastBodyStateRef.current);
+      }
+    })()
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) {
+          setIsStarting(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      audioEngine.stop();
+    };
+  }, [sessionActive, lastBodyStateRef]);
+
+  return { isStarting };
 }

@@ -48,33 +48,6 @@ export const conductorStyles = StyleSheet.create({
     marginBottom: 2,
     fontWeight: '600',
   },
-  mappingName: {
-    color: '#aaa',
-    fontSize: 13,
-    marginBottom: 8,
-  },
-  presetRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 10,
-  },
-  presetButton: {
-    backgroundColor: '#333',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  presetButtonActive: {
-    backgroundColor: '#4a9eff',
-  },
-  presetButtonText: {
-    color: '#ccc',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  presetButtonTextActive: {
-    color: '#fff',
-  },
   debug: {
     color: '#888',
     fontSize: 12,

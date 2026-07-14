@@ -17,16 +17,19 @@ export default function ConductorScreen() {
   const lastBodyStateRef = useRef<FullBodyState | null>(null);
 
   const { processPoseFrame } = useBodyMapping();
-  const { currentConfig, switchToPreset, applyToAudio } = useAudioMapping();
+  const { applyToAudio } = useAudioMapping();
 
   const { hasPermission, requestPermission } = useCameraPermission();
 
-  const audioSession = useAudioSession({ applyToAudio, lastBodyStateRef });
+  const { isStarting: isAudioStarting } = useAudioSession({
+    sessionActive,
+    applyToAudio,
+    lastBodyStateRef,
+  });
 
   const posePipeline = usePoseFramePipeline({
     processPoseFrame,
     applyToAudio,
-    isSoundEnabled: audioSession.isSoundEnabled,
     sessionActive,
     lastBodyStateRef,
   });
@@ -38,10 +41,9 @@ export default function ConductorScreen() {
   }, []);
 
   const endSession = useCallback(() => {
-    audioSession.stopSound();
-    posePipeline.resetDetection();
     setSessionActive(false);
-  }, [audioSession, posePipeline]);
+    posePipeline.resetDetection();
+  }, [posePipeline]);
 
   if (hasPermission === false) {
     return <CameraPermissionPrompt onRequestPermission={requestPermission} />;
@@ -64,17 +66,13 @@ export default function ConductorScreen() {
       <PoseCameraView style={styles.camera} onFrame={posePipeline.handlePoseFrame} />
 
       <SessionControls
-        isSoundEnabled={audioSession.isSoundEnabled}
-        isAudioStarting={audioSession.isAudioStarting}
+        isAudioStarting={isAudioStarting}
         bodyDetected={posePipeline.bodyDetected}
-        currentConfig={currentConfig}
         landmarkCount={posePipeline.landmarkCount}
         detectionScore={posePipeline.detectionScore}
         audioDebug={posePipeline.audioDebug}
         debugValues={posePipeline.debugValues}
-        onToggleSound={audioSession.toggleSound}
         onEndSession={endSession}
-        onSwitchPreset={switchToPreset}
       />
     </View>
   );

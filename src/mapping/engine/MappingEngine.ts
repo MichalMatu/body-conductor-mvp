@@ -6,7 +6,7 @@
  * 
  * Benefits:
  * - Mappings are data-driven (easy to save/load/switch)
- * - Same engine can power multiple presets
+ * - Same engine powers the bodyConductorMapping config
  * - Easy to debug and visualize
  */
 

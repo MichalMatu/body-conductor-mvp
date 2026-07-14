@@ -16,7 +16,6 @@ interface PoseFramePipelineOptions {
     landmarkCount: number;
   };
   applyToAudio: (bodyState: FullBodyState) => AudioParameters;
-  isSoundEnabled: boolean;
   sessionActive: boolean;
   lastBodyStateRef?: MutableRefObject<FullBodyState | null>;
 }
@@ -24,7 +23,6 @@ interface PoseFramePipelineOptions {
 export function usePoseFramePipeline({
   processPoseFrame,
   applyToAudio,
-  isSoundEnabled,
   sessionActive,
   lastBodyStateRef: externalBodyStateRef,
 }: PoseFramePipelineOptions) {
@@ -37,7 +35,7 @@ export function usePoseFramePipeline({
   const internalBodyStateRef = useRef<FullBodyState | null>(null);
   const lastBodyStateRef = externalBodyStateRef ?? internalBodyStateRef;
 
-  const isSoundEnabledRef = useRef(isSoundEnabled);
+  const sessionActiveRef = useRef(sessionActive);
   const applyToAudioRef = useRef(applyToAudio);
   const lastProcessRef = useRef(0);
   const lastDetectionRef = useRef(Date.now());
@@ -49,11 +47,11 @@ export function usePoseFramePipeline({
   const processScheduledRef = useRef(false);
 
   useEffect(() => {
-    isSoundEnabledRef.current = isSoundEnabled;
-    if (!isSoundEnabled) {
+    sessionActiveRef.current = sessionActive;
+    if (!sessionActive) {
       setAudioDebug('');
     }
-  }, [isSoundEnabled]);
+  }, [sessionActive]);
 
   useEffect(() => {
     applyToAudioRef.current = applyToAudio;
@@ -104,7 +102,7 @@ export function usePoseFramePipeline({
 
     if (!detected) {
       if (
-        isSoundEnabledRef.current &&
+        sessionActiveRef.current &&
         now - lastDetectionRef.current > 500 &&
         now - lastVolumeFadeRef.current > POSE_PROCESS_MS
       ) {
@@ -122,7 +120,7 @@ export function usePoseFramePipeline({
 
     lastBodyStateRef.current = bodyState;
 
-    if (isSoundEnabledRef.current) {
+    if (sessionActiveRef.current) {
       const params = applyToAudioRef.current(bodyState);
       if (__DEV__) {
         const f1 = params.osc1Frequency?.toFixed(0) ?? '—';
