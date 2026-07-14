@@ -1,17 +1,16 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, type StyleProp, type ViewStyle } from 'react-native';
 import { conductorStyles as styles } from '../styles';
 
 interface BodyDetectionIndicatorProps {
   bodyDetected: boolean;
+  style?: StyleProp<ViewStyle>;
 }
 
-const TOP_OFFSET = 12;
-
-export function BodyDetectionIndicator({ bodyDetected }: BodyDetectionIndicatorProps) {
+export function BodyDetectionIndicator({ bodyDetected, style }: BodyDetectionIndicatorProps) {
   return (
     <View
-      style={[styles.bodyIndicator, { top: TOP_OFFSET }]}
+      style={style}
       accessibilityLabel={bodyDetected ? 'Ciało widoczne' : 'Nie widać ciała'}
       accessibilityRole="image"
     >

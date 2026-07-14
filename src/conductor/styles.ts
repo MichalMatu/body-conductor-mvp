@@ -5,6 +5,11 @@ export const conductorStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
   startContainer: {
     flex: 1,
     backgroundColor: '#000',
@@ -32,10 +37,12 @@ export const conductorStyles = StyleSheet.create({
   camera: {
     flex: 1,
   },
-  bodyIndicator: {
+  bodyIndicatorEdge: {
     position: 'absolute',
-    right: 16,
-    zIndex: 10,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
   },
   bodyIndicatorDot: {
     width: 14,
@@ -51,17 +58,21 @@ export const conductorStyles = StyleSheet.create({
     backgroundColor: '#ef4444',
   },
   controls: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 10,
+    paddingLeft: 16,
+    paddingRight: 8,
     alignItems: 'center',
   },
   actionRow: {
+    width: '100%',
+    minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
-  },
-  actionSpacer: {
-    width: 12,
+    justifyContent: 'center',
+    paddingRight: 22,
+    marginBottom: 6,
+    position: 'relative',
   },
   status: {
     color: '#fff',
@@ -72,7 +83,6 @@ export const conductorStyles = StyleSheet.create({
   debugGrid: {
     flexDirection: 'row',
     width: '100%',
-    marginTop: 10,
     gap: 12,
   },
   debugColumn: {

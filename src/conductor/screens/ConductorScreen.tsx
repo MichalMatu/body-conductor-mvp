@@ -11,7 +11,6 @@ import { useAudioSession } from '../hooks/useAudioSession';
 import { useImmersiveSession } from '../hooks/useImmersiveSession';
 import { StartScreen } from '../components/StartScreen';
 import { CameraPermissionPrompt } from '../components/CameraPermissionPrompt';
-import { BodyDetectionIndicator } from '../components/BodyDetectionIndicator';
 import { SessionControls } from '../components/SessionControls';
 import { conductorStyles as styles } from '../styles';
 
@@ -56,7 +55,7 @@ export default function ConductorScreen() {
     content = <CameraPermissionPrompt onRequestPermission={requestPermission} />;
   } else if (hasPermission === null) {
     content = (
-      <View style={styles.container}>
+      <View style={[styles.container, styles.centered]}>
         <Text style={styles.status}>Przygotowywanie kamery...</Text>
       </View>
     );
@@ -67,10 +66,10 @@ export default function ConductorScreen() {
       <View style={styles.container}>
         <View style={styles.cameraArea}>
           <PoseCameraView style={styles.camera} onFrame={posePipeline.handlePoseFrame} />
-          <BodyDetectionIndicator bodyDetected={posePipeline.bodyDetected} />
         </View>
 
         <SessionControls
+          bodyDetected={posePipeline.bodyDetected}
           debugValues={posePipeline.debugValues}
           onEndSession={endSession}
         />
