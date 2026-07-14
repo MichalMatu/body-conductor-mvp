@@ -22,8 +22,11 @@ import {
 } from '../pose/sensitivity';
 
 const QUICKPOSE_FEATURES = [
+  'overlay.wholeBody',
   'rangeOfMotion.shoulder.left',
   'rangeOfMotion.shoulder.right',
+  'rangeOfMotion.elbow.left',
+  'rangeOfMotion.elbow.right',
 ] as const;
 
 const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
@@ -37,6 +40,8 @@ export default function ConductorScreen() {
   const [isSoundEnabled, setIsSoundEnabled] = useState(false);
   const [isAudioStarting, setIsAudioStarting] = useState(false);
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
+  const [detectionScore, setDetectionScore] = useState(0);
+  const [resultKeyCount, setResultKeyCount] = useState(0);
   const [bodyDetected, setBodyDetected] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
@@ -53,6 +58,8 @@ export default function ConductorScreen() {
   const lastVolumeFadeRef = useRef(0);
   const bodyDetectedRef = useRef(false);
   const debugRef = useRef<Partial<FullBodyState>>({});
+  const detectionScoreRef = useRef(0);
+  const resultKeysRef = useRef(0);
   const pendingResultsRef = useRef<Record<string, number> | null>(null);
   const processScheduledRef = useRef(false);
 
@@ -97,6 +104,8 @@ export default function ConductorScreen() {
 
       if (__DEV__) {
         const next = debugRef.current;
+        setDetectionScore(detectionScoreRef.current);
+        setResultKeyCount(resultKeysRef.current);
         if (next.leftHandHeightRel !== undefined) {
           setDebugValues({ ...next });
         }
@@ -112,15 +121,19 @@ export default function ConductorScreen() {
   }, []);
 
   const processPendingResults = useCallback(() => {
-    processScheduledRef.current = false;
     const now = Date.now();
-    if (now - lastProcessRef.current < POSE_PROCESS_MS) {
+    const elapsed = now - lastProcessRef.current;
+    if (elapsed < POSE_PROCESS_MS) {
+      setTimeout(processPendingResults, POSE_PROCESS_MS - elapsed);
       return;
     }
+    processScheduledRef.current = false;
     lastProcessRef.current = now;
 
     const results = pendingResultsRef.current ?? {};
-    const { bodyState, detected } = processQuickPoseResults(results);
+    resultKeysRef.current = Object.keys(results).length;
+    const { bodyState, detected, detectionScore: score } = processQuickPoseResults(results);
+    detectionScoreRef.current = score;
 
     if (!detected) {
       if (
@@ -318,6 +331,12 @@ export default function ConductorScreen() {
           <View style={styles.actionSpacer} />
           <Button title="Zakończ sesję" onPress={endSession} color="#b45309" />
         </View>
+
+        {__DEV__ && (
+          <Text style={styles.debugSmall}>
+            det: {detectionScore.toFixed(2)} | keys: {resultKeyCount}
+          </Text>
+        )}
 
         {showDebug && (
           <>

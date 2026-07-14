@@ -81,7 +81,11 @@ export const useBodyMapping = () => {
   const lastStateRef = useRef<FullBodyState>(initialBody);
 
   const processQuickPoseResults = useCallback(
-    (results: QuickPoseResults): { bodyState: FullBodyState; detected: boolean } => {
+    (results: QuickPoseResults): {
+      bodyState: FullBodyState;
+      detected: boolean;
+      detectionScore: number;
+    } => {
       const derived = deriveSignalsFromQuickPose(results);
 
       if (!derived.detected) {
@@ -93,7 +97,7 @@ export const useBodyMapping = () => {
           handsSpreadSpeed: lastStateRef.current.handsSpreadSpeed * 0.85,
         };
         lastStateRef.current = faded;
-        return { bodyState: faded, detected: false };
+        return { bodyState: faded, detected: false, detectionScore: derived.detectionScore };
       }
 
       let features: BodyFeatures = { ...defaultFeatures };
@@ -120,7 +124,11 @@ export const useBodyMapping = () => {
       const velocities = computeVelocity(features);
       const state: FullBodyState = { ...features, ...velocities };
       lastStateRef.current = state;
-      return { bodyState: state, detected: true };
+      return {
+        bodyState: state,
+        detected: true,
+        detectionScore: derived.detectionScore,
+      };
     },
     [computeVelocity]
   );

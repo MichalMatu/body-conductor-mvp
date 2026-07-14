@@ -7,8 +7,11 @@ export const VELOCITY_SMOOTH = 0.28;
 /** Cap for normalizing hand/spread speed into 0–1. */
 export const MAX_SPEED = 2.0;
 
-/** Min QuickPose result value treated as "body visible". */
+/** Min overlay.wholeBody confidence (0–1) for body visible. */
 export const DETECTION_THRESHOLD = 0.12;
+
+/** Min ROM angle (degrees) when overlay confidence is unavailable. */
+export const ROM_DETECTION_THRESHOLD = 3;
 
 /** Min interval between pose/audio processing (~4 fps). */
 export const POSE_PROCESS_MS = 250;
@@ -20,4 +23,4 @@ export const UI_SYNC_MS = 1500;
 export const DEBUG_UPDATE_MS = 1200;
 
 /** Ms without frames before marking body as lost. */
-export const DETECTION_TIMEOUT_MS = 900;
+export const DETECTION_TIMEOUT_MS = 2200;

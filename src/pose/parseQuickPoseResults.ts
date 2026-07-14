@@ -1,10 +1,18 @@
 import type { QuickPoseResults } from '@quickpose/react-native';
-import { DETECTION_THRESHOLD } from './sensitivity';
+import { DETECTION_THRESHOLD, ROM_DETECTION_THRESHOLD } from './sensitivity';
 
+const OVERLAY_WHOLE_BODY = 'overlay.wholeBody';
 const ROM_ELBOW_LEFT = 'rangeOfMotion.elbow.left';
 const ROM_ELBOW_RIGHT = 'rangeOfMotion.elbow.right';
 const ROM_SHOULDER_LEFT = 'rangeOfMotion.shoulder.left';
 const ROM_SHOULDER_RIGHT = 'rangeOfMotion.shoulder.right';
+
+const ROM_KEYS = [
+  ROM_SHOULDER_LEFT,
+  ROM_SHOULDER_RIGHT,
+  ROM_ELBOW_LEFT,
+  ROM_ELBOW_RIGHT,
+] as const;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -15,14 +23,25 @@ function normalizeRom(value: number, min: number, max: number): number {
   return clamp((value - min) / (max - min), 0, 1);
 }
 
-function detectionScore(results: QuickPoseResults): number {
-  let max = 0;
-  for (const value of Object.values(results)) {
-    if (typeof value === 'number' && value > max) {
-      max = value;
-    }
+function romValues(results: QuickPoseResults): number[] {
+  return ROM_KEYS.map((key) => results[key])
+    .filter((value): value is number => typeof value === 'number')
+    .map((value) => Math.abs(value));
+}
+
+function isBodyDetected(results: QuickPoseResults): { detected: boolean; score: number } {
+  const overlay = results[OVERLAY_WHOLE_BODY];
+  if (typeof overlay === 'number') {
+    return { detected: overlay >= DETECTION_THRESHOLD, score: overlay };
   }
-  return max;
+
+  const rom = romValues(results);
+  if (rom.length === 0) {
+    return { detected: false, score: 0 };
+  }
+
+  const score = Math.max(...rom);
+  return { detected: score >= ROM_DETECTION_THRESHOLD, score };
 }
 
 export interface QuickPoseDerivedSignals {
@@ -36,14 +55,13 @@ export interface QuickPoseDerivedSignals {
 }
 
 /**
- * Maps QuickPose feature values (ROM, overlay confidence) into body features
- * usable by the mapping engine. Raw (x,y) landmarks are not exposed by the SDK.
+ * Maps QuickPose feature values (overlay confidence + ROM) into body features
+ * for the mapping engine.
  */
 export function deriveSignalsFromQuickPose(
   results: QuickPoseResults
 ): QuickPoseDerivedSignals {
-  const score = detectionScore(results);
-  const detected = score >= DETECTION_THRESHOLD;
+  const { detected, score } = isBodyDetected(results);
 
   if (!detected) {
     return { detected: false, detectionScore: score };
@@ -71,9 +89,25 @@ export function deriveSignalsFromQuickPose(
     out.rightHandHeightRel = normalizeRom(rightShoulder, -40, 140) * 2 - 1;
   }
 
+  const opennessSources = [
+    results[OVERLAY_WHOLE_BODY],
+    leftShoulder,
+    rightShoulder,
+  ].filter((v): v is number => typeof v === 'number');
+
   if (typeof leftShoulder === 'number' && typeof rightShoulder === 'number') {
     const spread = Math.abs(leftShoulder - rightShoulder);
     out.bodyOpenness = clamp(0.22 + normalizeRom(spread, 8, 95) * 0.68, 0.15, 0.95);
+  } else if (opennessSources.length > 0) {
+    const avg =
+      opennessSources.reduce((sum, v) => {
+        const normalized =
+          typeof results[OVERLAY_WHOLE_BODY] === 'number' && v === results[OVERLAY_WHOLE_BODY]
+            ? normalizeRom(v, 0, 1)
+            : normalizeRom(v, -40, 140);
+        return sum + normalized;
+      }, 0) / opennessSources.length;
+    out.bodyOpenness = clamp(0.2 + avg * 0.7, 0.15, 0.95);
   } else if (typeof leftElbow === 'number' || typeof rightElbow === 'number') {
     const elbowAvg =
       ((typeof leftElbow === 'number' ? leftElbow : 90) +
