@@ -171,15 +171,6 @@ export default function ConductorScreen() {
         </View>
       )}
 
-      {isQuickPoseKeyConfigured() && (
-        <View style={styles.hintBanner}>
-          <Text style={styles.hintBannerText}>
-            Jeśli widzisz „SDK Key Invalid”: na dev.quickpose.ai dodaj Android bundle ID:
-            com.bodyconductor.app do tego klucza (lub wygeneruj nowy klucz dla tego pakietu).
-          </Text>
-        </View>
-      )}
-
       <QuickPoseView
         sdkKey={sdkKey}
         features={QUICKPOSE_FEATURES}
@@ -350,19 +341,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     fontWeight: '600',
-  },
-  hintBanner: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    padding: 6,
-    zIndex: 10,
-  },
-  hintBannerText: {
-    color: '#ccc',
-    fontSize: 10,
-    textAlign: 'center',
   },
 });
