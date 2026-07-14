@@ -1,8 +1,33 @@
 diff --git a/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseViewManager.kt b/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseViewManager.kt
-index 05f72d1..b363f32 100644
+index 05f72d1..c4e8a12 100644
 --- a/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseViewManager.kt
 +++ b/node_modules/@quickpose/react-native/android/src/main/java/ai/quickpose/reactnative/QuickPoseViewManager.kt
-@@ -180,7 +180,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+@@ -60,8 +60,22 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
+ 
+     @ReactProp(name = "sdkKey")
+     fun setSdkKey(view: FrameLayout, key: String?) {
+-        sdkKey = key ?: ""
++        val newKey = key ?: ""
++        if (newKey == sdkKey) return
++        sdkKey = newKey
++        if (hasStarted) {
++            resetQuickPose(view)
++        }
+         tryStart(view)
+     }
+ 
++    private fun resetQuickPose(view: FrameLayout) {
++        quickPose?.stop()
++        cameraSwitchView?.stop()
++        quickPose = null
++        cameraSwitchView = null
++        hasStarted = false
++        view.removeAllViews()
++    }
++
+     @ReactProp(name = "features")
+     fun setFeatures(view: FrameLayout, features: ReadableArray?) {
+@@ -180,7 +194,7 @@ class QuickPoseViewManager : SimpleViewManager<FrameLayout>() {
  
          val keyed = mapFeatures()
          if (keyed.isEmpty()) return

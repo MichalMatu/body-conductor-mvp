@@ -1,19 +1,32 @@
 import Constants from 'expo-constants';
+import { QUICKPOSE_SDK_KEY_LOCAL } from './sdk-key.local';
 
 const PLACEHOLDER = 'your-key-here';
 
-function readFromExtra(): string {
-  const extra = Constants.expoConfig?.extra;
-  const value = extra?.quickposeSdkKey;
-  return typeof value === 'string' ? value.trim() : '';
+export function getQuickPoseSdkKey(): string {
+  if (
+    QUICKPOSE_SDK_KEY_LOCAL &&
+    !QUICKPOSE_SDK_KEY_LOCAL.includes(PLACEHOLDER)
+  ) {
+    return QUICKPOSE_SDK_KEY_LOCAL.trim();
+  }
+
+  const fromExtra = Constants.expoConfig?.extra?.quickposeSdkKey;
+  if (typeof fromExtra === 'string') {
+    const trimmed = fromExtra.trim();
+    if (trimmed && !trimmed.includes(PLACEHOLDER)) {
+      return trimmed;
+    }
+  }
+
+  const fromEnv = process.env.EXPO_PUBLIC_QUICKPOSE_SDK_KEY?.trim();
+  if (fromEnv && !fromEnv.includes(PLACEHOLDER)) {
+    return fromEnv;
+  }
+
+  return '';
 }
 
-function readFromProcessEnv(): string {
-  const value = process.env.EXPO_PUBLIC_QUICKPOSE_SDK_KEY;
-  return typeof value === 'string' ? value.trim() : '';
+export function isQuickPoseKeyConfigured(): boolean {
+  return getQuickPoseSdkKey().length > 0;
 }
-
-export const QUICKPOSE_SDK_KEY = readFromExtra() || readFromProcessEnv();
-
-export const isQuickPoseKeyConfigured =
-  QUICKPOSE_SDK_KEY.length > 0 && !QUICKPOSE_SDK_KEY.includes(PLACEHOLDER);

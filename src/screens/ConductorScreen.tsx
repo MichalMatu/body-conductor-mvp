@@ -13,21 +13,14 @@ import { useBodyMapping } from '../pose/useBodyMapping';
 import { audioEngine } from '../audio/AudioEngine';
 import { useAudioMapping, MappingPresetName } from '../mapping/useAudioMapping';
 import { FullBodyState } from '../stores/useAppStore';
-import { QUICKPOSE_SDK_KEY, isQuickPoseKeyConfigured } from '../config/env';
+import { getQuickPoseSdkKey, isQuickPoseKeyConfigured } from '../config/env';
 import {
   DEBUG_UPDATE_MS,
   DETECTION_UI_MS,
   DETECTION_TIMEOUT_MS,
 } from '../pose/sensitivity';
 
-const QUICKPOSE_FEATURES = [
-  'overlay.wholeBody',
-  'showPoints',
-  'rangeOfMotion.elbow.left',
-  'rangeOfMotion.elbow.right',
-  'rangeOfMotion.shoulder.left',
-  'rangeOfMotion.shoulder.right',
-];
+const QUICKPOSE_FEATURES = ['overlay.wholeBody', 'showPoints'];
 
 const PRESET_BUTTONS: { label: string; preset: MappingPresetName }[] = [
   { label: 'Default', preset: 'default' },
@@ -40,6 +33,7 @@ export default function ConductorScreen() {
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
   const [bodyDetected, setBodyDetected] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const sdkKey = getQuickPoseSdkKey();
 
   const { processQuickPoseResults } = useBodyMapping();
   const { currentConfig, switchToPreset, applyToAudio } = useAudioMapping();
@@ -169,17 +163,25 @@ export default function ConductorScreen() {
 
   return (
     <View style={styles.container}>
-      {!isQuickPoseKeyConfigured && (
+      {!isQuickPoseKeyConfigured() && (
         <View style={styles.warningBanner}>
           <Text style={styles.warningText}>
-            ⚠️ Brak klucza QuickPose — utwórz plik .env z EXPO_PUBLIC_QUICKPOSE_SDK_KEY (patrz
-            .env.example), potem zrestartuj Metro: npx expo start --dev-client --clear
+            ⚠️ Brak klucza — uzupełnij src/config/sdk-key.local.ts lub .env, potem Reload
+          </Text>
+        </View>
+      )}
+
+      {isQuickPoseKeyConfigured() && (
+        <View style={styles.hintBanner}>
+          <Text style={styles.hintBannerText}>
+            Jeśli widzisz „SDK Key Invalid”: na dev.quickpose.ai dodaj Android bundle ID:
+            com.bodyconductor.app do tego klucza (lub wygeneruj nowy klucz dla tego pakietu).
           </Text>
         </View>
       )}
 
       <QuickPoseView
-        sdkKey={QUICKPOSE_SDK_KEY}
+        sdkKey={sdkKey}
         features={QUICKPOSE_FEATURES}
         useFrontCamera={true}
         onUpdate={handleUpdate}
@@ -348,5 +350,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     fontWeight: '600',
+  },
+  hintBanner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    padding: 6,
+    zIndex: 10,
+  },
+  hintBannerText: {
+    color: '#ccc',
+    fontSize: 10,
+    textAlign: 'center',
   },
 });

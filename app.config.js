@@ -41,6 +41,7 @@ module.exports = {
     android: {
       package: "com.bodyconductor.app",
       permissions: [
+        "android.permission.INTERNET",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
