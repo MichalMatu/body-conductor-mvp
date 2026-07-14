@@ -1,10 +1,10 @@
 /**
  * bodyFeatures.ts
  * 
- * Rich, normalized body feature extraction from QuickPose / MediaPipe keypoints.
+ * Rich, normalized body feature extraction from MediaPipe BlazePose landmarks.
  * All features are designed to be stable inputs for the mapping system.
  * 
- * Coordinate assumptions (QuickPose/MediaPipe normalized):
+ * Coordinate assumptions (MediaPipe normalized):
  * - x, y in range ~[0, 1]
  * - (0,0) is top-left, y increases downward
  */
@@ -48,7 +48,7 @@ export interface BodyFeatures {
   torsoCenterY: number;
 }
 
-// Standard MediaPipe/BlazePose indices used by QuickPose
+// Standard MediaPipe BlazePose landmark indices
 const KP = {
   NOSE: 0,
   LEFT_SHOULDER: 11,

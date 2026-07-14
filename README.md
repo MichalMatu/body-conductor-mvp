@@ -13,13 +13,7 @@ Elastyczny system mapowania pozycji całego ciała na generator dźwięku (spati
    ```bash
    cd ios && pod install
    ```
-4. **Skonfiguruj klucz QuickPose** — skopiuj `.env.example` do `.env` i wklej klucz z https://dev.quickpose.ai:
-   ```bash
-   cp .env.example .env
-   ```
-   Bez ważnego klucza aplikacja nie wykryje ciała. Plik `.env` nie trafia do gita.
-
-5. Dla Androida (Samsung S22 Plus):
+4. Dla Androida (Samsung S22 Plus):
    - Upewnij się, że telefon jest podłączony przez USB z włączonym debugowaniem.
    - Uruchom build:
      ```bash
@@ -30,11 +24,11 @@ Elastyczny system mapowania pozycji całego ciała na generator dźwięku (spati
      cd android && ./gradlew assembleDebug && adb install -r app/build/outputs/apk/debug/app-debug.apk
      ```
 
-   Uwaga: Wymagany development build (nie działa w Expo Go ze względu na natywne moduły QuickPose + react-native-audio-api).
+   Uwaga: Wymagany development build (nie działa w Expo Go ze względu na natywne moduły MediaPipe + react-native-audio-api).
 
 ## Co działa w tym MVP (rozbudowany)
 
-- Detekcja całego ciała przez QuickPose
+- Detekcja całego ciała przez MediaPipe BlazePose (`@thinksys/react-native-mediapipe`)
 - Bogaty system cech ciała (~15+ parametrów): wysokość rąk względem barków, otwartość ciała, kąty łokci, prędkości ruchu itd.
 - **Elastyczny system mapowania** (deklaratywny):
   - `MappingRule` — dowolna cecha ciała → dowolny parametr audio
@@ -59,9 +53,9 @@ Elastyczny system mapowania pozycji całego ciała na generator dźwięku (spati
 
 ## Pliki warte uwagi
 
-- `plan.md` – pełny plan i koncepcja
 - `src/audio/AudioEngine.ts` – silnik dźwiękowy
 - `src/pose/useBodyMapping.ts` – przetwarzanie pozycji ciała
-- `src/stores/useAppStore.ts` – globalny stan
+- `src/pose/PoseCameraView.tsx` – kamera MediaPipe
+- `src/screens/ConductorScreen.tsx` – główny ekran aplikacji
 
 Powodzenia! To solidny szkielet pod dalszą rozbudowę.

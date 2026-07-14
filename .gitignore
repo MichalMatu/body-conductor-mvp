@@ -29,12 +29,10 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files (API keys, secrets)
+# local env files
 .env
 .env.local
 .env*.local
-!.env.example
-src/config/sdk-key.local.ts
 
 # typescript
 *.tsbuildinfo

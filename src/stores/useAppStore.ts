@@ -1,1 +1,0 @@
-export type { FullBodyState, BodyFeatures } from '../pose/types';
