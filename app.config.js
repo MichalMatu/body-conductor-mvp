@@ -69,7 +69,12 @@ module.exports = {
           cameraPermission: "Aplikacja Body Conductor potrzebuje dostępu do kamery, aby śledzić ruchy Twojego ciała."
         }
       ],
-      "expo-dev-client"
+      [
+        "expo-dev-client",
+        {
+          launchMode: "most-recent",
+        },
+      ]
     ]
   }
 };

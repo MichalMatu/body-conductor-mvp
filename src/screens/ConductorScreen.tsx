@@ -87,7 +87,11 @@ export default function ConductorScreen() {
           buttonNegative: 'Anuluj',
         }
       );
-      setHasCameraPermission(granted === PermissionsAndroid.RESULTS.GRANTED);
+      const ok = granted === PermissionsAndroid.RESULTS.GRANTED;
+      setHasCameraPermission(ok);
+      if (ok) {
+        setSessionActive(true);
+      }
     })();
   }, []);
 
@@ -247,16 +251,13 @@ export default function ConductorScreen() {
     return (
       <View style={styles.startContainer}>
         <Text style={styles.startTitle}>Body Conductor</Text>
-        <Text style={styles.startSubtitle}>
-          Kamera i śledzenie ciała uruchamiają się dopiero po starcie sesji — mniejsze
-          obciążenie telefonu.
-        </Text>
+        <Text style={styles.startSubtitle}>Uruchamianie kamery...</Text>
         {!isQuickPoseKeyConfigured() && (
           <Text style={styles.startWarning}>
             Brak klucza QuickPose — uzupełnij .env lub sdk-key.local.ts
           </Text>
         )}
-        <Button title="Rozpocznij sesję" onPress={startSession} />
+        <Button title="Rozpocznij teraz" onPress={startSession} />
       </View>
     );
   }
