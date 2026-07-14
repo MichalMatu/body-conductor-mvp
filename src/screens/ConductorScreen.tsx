@@ -42,6 +42,7 @@ export default function ConductorScreen() {
   const [debugValues, setDebugValues] = useState<Partial<FullBodyState>>({});
   const [detectionScore, setDetectionScore] = useState(0);
   const [resultKeyCount, setResultKeyCount] = useState(0);
+  const [resultKeysLabel, setResultKeysLabel] = useState('');
   const [bodyDetected, setBodyDetected] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
@@ -139,8 +140,10 @@ export default function ConductorScreen() {
     const { bodyState, detected, detectionScore: score } = processQuickPoseResults(results);
     detectionScoreRef.current = score;
 
+    const keys = Object.keys(results);
     setDetectionScore(score);
-    setResultKeyCount(Object.keys(results).length);
+    setResultKeyCount(keys.length);
+    setResultKeysLabel(keys.join(', '));
 
     if (!detected) {
       if (
@@ -344,6 +347,12 @@ export default function ConductorScreen() {
           sygnał: {detectionScore.toFixed(2)} | dane: {resultKeyCount}
           {resultKeyCount === 0 ? ' (brak danych z QuickPose)' : ''}
         </Text>
+        {resultKeysLabel.length > 0 && (
+          <Text style={styles.debugTiny}>{resultKeysLabel}</Text>
+        )}
+        {!isQuickPoseKeyConfigured() && (
+          <Text style={styles.debugTiny}>⚠️ brak klucza SDK QuickPose</Text>
+        )}
 
         {showDebug && (
           <>
@@ -457,6 +466,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 1,
     textAlign: 'center',
+  },
+  debugTiny: {
+    color: '#555',
+    fontSize: 9,
+    marginTop: 2,
+    textAlign: 'center',
+    paddingHorizontal: 8,
   },
   detected: {
     color: '#4ade80',

@@ -23,26 +23,38 @@ function normalizeRom(value: number, min: number, max: number): number {
   return clamp((value - min) / (max - min), 0, 1);
 }
 
+function numericValues(results: QuickPoseResults): number[] {
+  return Object.values(results).filter(
+    (value): value is number => typeof value === 'number' && !Number.isNaN(value)
+  );
+}
+
 function romValues(results: QuickPoseResults): number[] {
   return ROM_KEYS.map((key) => results[key])
-    .filter((value): value is number => typeof value === 'number')
+    .filter((value): value is number => typeof value === 'number' && !Number.isNaN(value))
     .map((value) => Math.abs(value));
 }
 
 function isBodyDetected(results: QuickPoseResults): { detected: boolean; score: number } {
+  const keys = Object.keys(results);
+  if (keys.length === 0) {
+    return { detected: false, score: 0 };
+  }
+
   const overlay = results[OVERLAY_WHOLE_BODY];
   const rom = romValues(results);
   const romMax = rom.length > 0 ? Math.max(...rom) : 0;
+  const allMax = numericValues(results).reduce((max, v) => Math.max(max, Math.abs(v)), 0);
 
   const overlayScore = typeof overlay === 'number' ? overlay : 0;
-  const score = Math.max(overlayScore, romMax);
+  const score = Math.max(overlayScore, romMax, allMax);
 
   const overlayOk =
     typeof overlay === 'number' && overlay >= DETECTION_THRESHOLD;
   const romOk = rom.length >= 1 && romMax >= ROM_DETECTION_THRESHOLD;
-  const romTracking = rom.length >= 2 && romMax > 0.5;
+  const anySignal = allMax > 0.01;
 
-  return { detected: overlayOk || romOk || romTracking, score };
+  return { detected: overlayOk || romOk || anySignal, score };
 }
 
 export interface QuickPoseDerivedSignals {
@@ -69,6 +81,7 @@ export function deriveSignalsFromQuickPose(
   }
 
   const out: QuickPoseDerivedSignals = { detected: true, detectionScore: score };
+  const overlay = results[OVERLAY_WHOLE_BODY];
 
   const leftElbow = results[ROM_ELBOW_LEFT];
   if (typeof leftElbow === 'number') {
@@ -90,25 +103,17 @@ export function deriveSignalsFromQuickPose(
     out.rightHandHeightRel = normalizeRom(rightShoulder, -40, 140) * 2 - 1;
   }
 
-  const opennessSources = [
-    results[OVERLAY_WHOLE_BODY],
-    leftShoulder,
-    rightShoulder,
-  ].filter((v): v is number => typeof v === 'number');
-
   if (typeof leftShoulder === 'number' && typeof rightShoulder === 'number') {
     const spread = Math.abs(leftShoulder - rightShoulder);
     out.bodyOpenness = clamp(0.22 + normalizeRom(spread, 8, 95) * 0.68, 0.15, 0.95);
-  } else if (opennessSources.length > 0) {
-    const avg =
-      opennessSources.reduce((sum, v) => {
-        const normalized =
-          typeof results[OVERLAY_WHOLE_BODY] === 'number' && v === results[OVERLAY_WHOLE_BODY]
-            ? normalizeRom(v, 0, 1)
-            : normalizeRom(v, -40, 140);
-        return sum + normalized;
-      }, 0) / opennessSources.length;
-    out.bodyOpenness = clamp(0.2 + avg * 0.7, 0.15, 0.95);
+  } else if (typeof overlay === 'number') {
+    out.bodyOpenness = clamp(0.2 + normalizeRom(overlay, 0, 1) * 0.7, 0.15, 0.95);
+    if (out.leftHandHeightRel === undefined) {
+      out.leftHandHeightRel = normalizeRom(overlay, 0, 1) * 2 - 1;
+    }
+    if (out.rightHandHeightRel === undefined) {
+      out.rightHandHeightRel = normalizeRom(overlay, 0, 1) * 2 - 1;
+    }
   } else if (typeof leftElbow === 'number' || typeof rightElbow === 'number') {
     const elbowAvg =
       ((typeof leftElbow === 'number' ? leftElbow : 90) +

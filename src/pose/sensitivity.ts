@@ -13,8 +13,8 @@ export const DETECTION_THRESHOLD = 0.06;
 /** Min ROM angle (degrees) when overlay confidence is unavailable. */
 export const ROM_DETECTION_THRESHOLD = 1;
 
-/** Min interval between pose/audio processing (~4 fps). */
-export const POSE_PROCESS_MS = 250;
+/** Min interval between pose/audio processing (~6 fps). */
+export const POSE_PROCESS_MS = 160;
 
 /** How often the status row is synced from refs to React state (ms). */
 export const UI_SYNC_MS = 1500;
